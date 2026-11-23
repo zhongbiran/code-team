@@ -4,12 +4,13 @@
 // （约 120 秒）才降级 HTTPS。这里用自定义 provider 直接走 HTTPS，并统一模型/档位/只读沙箱。
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { recordEvent } from "./record-event.mjs";
+import { recordEvent, readEvents } from "./record-event.mjs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CONFIG = join(ROOT, "config", "team.json");
+const EVENTS_FILE = join(ROOT, "config", "events.jsonl");
 const LEDGER = join(ROOT, "config", "usage-ledger.json");
 const SCHEMA = join(ROOT, "config", "plan-schema.json");
 
@@ -84,24 +85,42 @@ function appendUsage(entry) {
   writeFileSync(LEDGER, JSON.stringify(ledger, null, 2) + "\n", "utf8");
 }
 
+// 预算从事件流算——它是唯一真相源。
+// 旧版另有一份 usage-ledger.json，两份账本迟早会打架。
 function showBudget() {
-  const ledger = readLedger();
   const now = Date.now();
   const windowMs = 5 * 60 * 60 * 1000;
-  const recent = ledger.calls.filter((c) => now - new Date(c.at).getTime() < windowMs);
-  const sum = (k) => recent.reduce((n, c) => n + (c.usage?.[k] ?? 0), 0);
-  console.log("Codex 用量（最近 5 小时窗口）");
-  console.log("  调用次数: " + recent.length);
-  console.log("  input tokens: " + sum("input_tokens"));
-  console.log("  cached tokens: " + sum("cached_input_tokens"));
-  console.log("  output tokens: " + sum("output_tokens"));
-  console.log("  reasoning tokens: " + sum("reasoning_output_tokens"));
-  if (recent.length) {
-    const byRole = {};
-    for (const c of recent) byRole[c.role] = (byRole[c.role] ?? 0) + 1;
-    console.log("  按角色: " + JSON.stringify(byRole));
-  }
-  console.log("  账本: " + LEDGER);
+  const all = readEvents().filter((e) => e.kind === "codex-call" || e.kind === "call");
+  const recent = all.filter((e) => now - new Date(e.at).getTime() < windowMs);
+  const utc = new Date(now);
+  const today = all.filter((e) => {
+    const d = new Date(e.at);
+    return d.getUTCFullYear() === utc.getUTCFullYear() &&
+      d.getUTCMonth() === utc.getUTCMonth() &&
+      d.getUTCDate() === utc.getUTCDate();
+  });
+
+  const stat = (list, title) => {
+    const sum = (k) => list.reduce((n, e) => n + (e.usage?.[k] ?? 0), 0);
+    const elapsed = list.reduce((n, e) => n + (e.elapsedSec ?? 0), 0);
+    console.log(title);
+    console.log("  调用次数: " + list.length);
+    console.log("  input tokens: " + sum("input_tokens"));
+    console.log("  cached tokens: " + sum("cached_input_tokens"));
+    console.log("  output tokens: " + sum("output_tokens"));
+    console.log("  reasoning tokens: " + sum("reasoning_output_tokens"));
+    console.log("  总耗时: " + elapsed.toFixed(1) + "s");
+    if (list.length) {
+      const byRole = {};
+      for (const c of list) byRole[c.role ?? "(未记录)"] = (byRole[c.role ?? "(未记录)"] ?? 0) + 1;
+      console.log("  按角色: " + JSON.stringify(byRole));
+    }
+    console.log("");
+  };
+
+  stat(recent, "最近 5 小时窗口（额度约束看这个）");
+  stat(today, "今天累计（UTC 日）");
+  console.log("  事件流: " + EVENTS_FILE);
 }
 
 // Overmind 的输出契约：它必须产出决策、拆包和每个包的 brief —— 主会话不参与这些判断。

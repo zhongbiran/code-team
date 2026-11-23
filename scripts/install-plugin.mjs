@@ -4,7 +4,7 @@
 // 用法：node scripts/install-plugin.mjs [--dry-run]
 //
 // 装完需要：打开 /plugins → Ctrl+R 刷新 → 启用 Code Team → 重开会话。
-import { readdirSync, statSync, copyFileSync, mkdirSync, existsSync } from "node:fs";
+import { readdirSync, statSync, copyFileSync, mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -50,6 +50,15 @@ if (dryRun) {
 }
 
 mkdirSync(DEST, { recursive: true });
+
+// 运行时数据先备份再还原：
+// 源目录（git 仓库）不含这些文件，但目标目录可能有——那是用户的数据，不能因为装一次插件就没了。
+const saved = new Map();
+for (const f of skipped) {
+  const from = join(DEST, f);
+  if (existsSync(from)) saved.set(f, readFileSync(from));
+}
+
 let copied = 0;
 for (const f of files) {
   const to = join(DEST, f);
@@ -58,7 +67,17 @@ for (const f of files) {
   copied++;
 }
 console.log("已复制 " + copied + " 个文件");
-if (skipped.length) console.log("已保留现有运行时数据：" + skipped.join(", "));
+
+if (saved.size) {
+  for (const [f, content] of saved) {
+    const to = join(DEST, f);
+    mkdirSync(dirname(to), { recursive: true });
+    writeFileSync(to, content);
+  }
+  console.log("已还原运行时数据：" + [...saved.keys()].join(", "));
+} else if (skipped.length) {
+  console.log("运行时数据（源目录没有，保持现有）：" + skipped.join(", "));
+}
 console.log("");
 console.log("接下来：");
 console.log("  1. 打开 /plugins，按 Ctrl+R 刷新");

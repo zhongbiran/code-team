@@ -32,6 +32,24 @@ function walk(dir) {
 const files = walk(CODEX_SESSIONS).filter((f) => statSync(f).mtimeMs >= since);
 console.log("扫到 " + files.length + " 个会话文件（最近 " + DAYS + " 天）");
 
+// 从会话文件名或模型名推断这次调用是哪个角色。
+// codex 会话记录里没有角色字段，只能按线索猜——猜不出就标"(未记录)"，
+// 由控制台的人工归因补上，不硬猜。
+function inferRole(model, file) {
+  const name = String(file).toLowerCase();
+  if (name.includes("overmind")) return "overmind";
+  if (name.includes("coder")) return "coder";
+  return null;
+}
+
+// 统一成 UTC ISO 字符串。codex 的 timestamp 带 Z，但 p.started_at 转出来可能是本地格式。
+function normalizeIso(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
 const events = [];
 for (const file of files) {
   const lines = readFileSync(file, "utf8").split(/\r?\n/).filter(Boolean);
@@ -58,9 +76,12 @@ for (const file of files) {
       if (p.type === "task_started" || p.type === "task_started_event") startedAt = p.timestamp ?? startedAt;
       if (p.type === "task_complete") {
         durationMs = p.duration_ms ?? durationMs;
-        startedAt = p.started_at ? new Date(p.started_at * 1000).toISOString() : (startedAt ?? rec.timestamp);
+        if (p.started_at) startedAt = new Date(p.started_at * 1000).toISOString();
       }
     }
+    // 兜底：会话记录里最早的时间戳一定是 UTC ISO。
+    // 少了它，回填出来的时间会被当成本地时间，5 小时窗口就全错位了。
+    if (!startedAt && rec.timestamp) startedAt = rec.timestamp;
   }
 
   if (!usage) continue;
@@ -76,9 +97,9 @@ for (const file of files) {
   })();
 
   events.push({
-    at: startedAt ?? new Date(statSync(file).mtimeMs).toISOString(),
+    at: normalizeIso(startedAt) ?? new Date(statSync(file).mtimeMs).toISOString(),
     kind: "codex-call",
-    role: null,
+    role: inferRole(model, file),
     backend: "codex-cli",
     model: model ?? "(未知)",
     effort: effort ?? null,
