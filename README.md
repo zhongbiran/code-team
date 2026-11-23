@@ -29,10 +29,13 @@
 
 ### 1. 插件
 
-把 `plugin/` 整个目录复制到 MiniMax Code 的本地插件目录，然后打开 `/plugins` 按 `Ctrl+R` 刷新，
-找到 Code Team 按空格启用。**重开一个会话**，skill 才会出现在可用列表里。
+```bash
+node scripts/install-plugin.mjs            # 装到 %USERPROFILE%\.minimax\plugins\code-team
+node scripts/install-plugin.mjs --dry-run  # 只看会装什么
+```
 
-Windows 上的默认位置是 `%USERPROFILE%\.minimax\plugins\code-team`。
+装完打开 `/plugins` 按 `Ctrl+R` 刷新，找到 Code Team 按空格启用。
+**重开一个会话**，skill 才会出现在可用列表里。
 
 ### 2. 控制台（可选）
 
@@ -107,6 +110,14 @@ node scripts/lessons.mjs check                  # 跑所有检查
 
 每条检查必须**先在旧现场验证它会失败**，再确认当前代码能过。
 
+## 推到 GitHub
+
+```bash
+gh auth login --hostname github.com --git-protocol https --web   # 浏览器里授权一次
+node scripts/publish-github.mjs                                   # 建仓库 + 推送
+node scripts/publish-github.mjs --private                        # 建私有仓库
+```
+
 ## 文档
 
 | 文档 | 内容 |
@@ -117,6 +128,7 @@ node scripts/lessons.mjs check                  # 跑所有检查
 | [docs/mcode-stack-提纯.md](docs/mcode-stack-提纯.md) | 官方 skill 到本工作流的映射 |
 | [docs/agent-brief-实测记录.md](docs/agent-brief-实测记录.md) | brief 的对照实验与结论 |
 | [docs/市场对比分析.md](docs/市场对比分析.md) | 与 MiniMax 插件市场的对比、差距与提升点 |
+| [docs/新会话实测指南.md](docs/新会话实测指南.md) | 怎么开一场实测、看什么、怎么记纠正 |
 
 ## 许可
 
