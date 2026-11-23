@@ -19,6 +19,13 @@ if (!existsSync(SRC)) {
   process.exit(1);
 }
 
+// 运行时数据：安装时不能覆盖——那是用户的用量记录、纠正台账。
+const RUNTIME_DATA = new Set([
+  "config/events.jsonl",
+  "config/usage-ledger.json",
+  "config/lessons.json",
+]);
+
 function walk(dir, base = dir) {
   const out = [];
   for (const name of readdirSync(dir)) {
@@ -29,12 +36,16 @@ function walk(dir, base = dir) {
   return out;
 }
 
-const files = walk(SRC);
+const all = walk(SRC);
+const files = all.filter((f) => !RUNTIME_DATA.has(f.replace(/\\/g, "/")));
+const skipped = all.filter((f) => RUNTIME_DATA.has(f.replace(/\\/g, "/")));
+
 console.log((dryRun ? "[dry-run] " : "") + SRC + " → " + DEST);
-console.log(files.length + " 个文件");
+console.log(files.length + " 个文件" + (skipped.length ? "（跳过 " + skipped.length + " 个运行时数据文件）" : ""));
 
 if (dryRun) {
   for (const f of files) console.log("  " + f);
+  for (const f of skipped) console.log("  - " + f + "（保留现有）");
   process.exit(0);
 }
 
@@ -47,6 +58,7 @@ for (const f of files) {
   copied++;
 }
 console.log("已复制 " + copied + " 个文件");
+if (skipped.length) console.log("已保留现有运行时数据：" + skipped.join(", "));
 console.log("");
 console.log("接下来：");
 console.log("  1. 打开 /plugins，按 Ctrl+R 刷新");

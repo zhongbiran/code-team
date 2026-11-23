@@ -77,6 +77,9 @@ node scripts/codex-team.mjs budget
 
 # 跑自动检查
 node scripts/lessons.mjs check
+
+# 从 Codex 会话记录回填事件流（事件流丢了或想统计历史时）
+node scripts/rebuild-from-codex.mjs --days 7
 ```
 
 在对话里直接说「用 Code Team 做 X」也可以，主会话会转交 Overmind。
