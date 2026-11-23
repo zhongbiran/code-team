@@ -20,7 +20,7 @@
 
 | 路径 | 是什么 |
 |---|---|
-| `plugin.agent-plugins.json` | Agent Plugins v1.0.0 清单（跨客户端通用） |
+| `plugin.json` | Agent Plugins v1.0.0 清单（跨客户端通用，Mac 导入认这个） |
 | `.minimax-plugin/plugin.json` | MiniMax Code 清单 |
 | `skills/code-team/` | 主 skill：角色分工与执行流程 |
 | `scripts/` | codex-team / record-event / lessons / bootstrap / rebuild + 安装推送脚本 |
@@ -45,7 +45,7 @@ node scripts/install-plugin.mjs --dry-run  # 只看会装什么
 装完打开 `/plugins` 按 `Ctrl+R` 刷新，找到 Code Team 按空格启用。**重开一个会话**，skill 才会出现在可用列表里。
 
 **Mac / 其他客户端**：直接导入本仓库即可——仓库根就是插件根，
-`plugin.agent-plugins.json` 是 Agent Plugins v1.0.0 格式。
+根目录的 `plugin.json` 是 Agent Plugins v1.0.0 格式，`skills/` 在根目录（该规范要求的固定位置）。
 
 装完打开 `/plugins` 按 `Ctrl+R` 刷新，找到 Code Team 按空格启用。
 **重开一个会话**，skill 才会出现在可用列表里。

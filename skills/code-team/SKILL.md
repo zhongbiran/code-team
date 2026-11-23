@@ -55,7 +55,7 @@ Code Team 是**编排层**，不复制这些 skill，只在流程里调用它们
 
 ```text
 <插件根>/
-├── plugin.agent-plugins.json   Agent Plugins 格式清单
+├── plugin.json                 Agent Plugins v1.0.0 清单（Mac 导入认这个）
 ├── .minimax-plugin/            MiniMax 格式清单
 ├── skills/code-team/SKILL.md   本 skill
 ├── scripts/                    codex-team / record-event / lessons / bootstrap / rebuild
