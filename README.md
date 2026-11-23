@@ -20,10 +20,18 @@
 
 | 路径 | 是什么 |
 |---|---|
-| `plugin/` | Code Team 插件本体（流程、角色、埋点、检查） |
+| `plugin.agent-plugins.json` | Agent Plugins v1.0.0 清单（跨客户端通用） |
+| `.minimax-plugin/plugin.json` | MiniMax Code 清单 |
+| `skills/code-team/` | 主 skill：角色分工与执行流程 |
+| `scripts/` | codex-team / record-event / lessons / bootstrap / rebuild + 安装推送脚本 |
+| `checks/` | 自动检查脚本（自我提升的产物） |
+| `config/` | team.json（角色配置）、events.jsonl（事件流） |
+| `references/` | 方法论与架构文档 |
 | `miniapps/code-team-board/` | Code Team 控制台（MiniApp：诊断 + 统计 + 配置） |
 | `docs/` | 调研与设计文档 |
 | `research/` | MiniMax Code 官方博客原文（12 篇） |
+
+仓库根目录就是插件根——两种清单格式并列，Mac / Windows / 其他兼容客户端都能装。
 
 ## 安装
 
@@ -33,6 +41,11 @@
 node scripts/install-plugin.mjs            # 装到 %USERPROFILE%\.minimax\plugins\code-team
 node scripts/install-plugin.mjs --dry-run  # 只看会装什么
 ```
+
+装完打开 `/plugins` 按 `Ctrl+R` 刷新，找到 Code Team 按空格启用。**重开一个会话**，skill 才会出现在可用列表里。
+
+**Mac / 其他客户端**：直接导入本仓库即可——仓库根就是插件根，
+`plugin.agent-plugins.json` 是 Agent Plugins v1.0.0 格式。
 
 装完打开 `/plugins` 按 `Ctrl+R` 刷新，找到 Code Team 按空格启用。
 **重开一个会话**，skill 才会出现在可用列表里。
@@ -47,7 +60,7 @@ node scripts/install-plugin.mjs --dry-run  # 只看会装什么
 
 ## 角色配置
 
-全部在 `plugin/config/team.json`，控制台的「配置」页可以直接改并写回。
+全部在 `config/team.json`，控制台的「配置」页可以直接改并写回。
 
 | 角色 | 类型 | 默认后端 | 默认模型 | 职责 |
 |---|---|---|---|---|

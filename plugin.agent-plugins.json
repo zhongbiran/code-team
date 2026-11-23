@@ -1,0 +1,33 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "code-team",
+  "version": "1.1.0",
+  "description": "多 Agent 协作工作流：决策权在 Overmind（Codex CLI），代码方向交 Coder，执行由 worker/explore/verifier 并行完成。含额度守卫与可替换后端配置。",
+  "author": {
+    "name": "Zhong Biran",
+    "email": "zhongbiran@qq.com"
+  },
+  "homepage": "https://github.com/zhongbiran/code-team",
+  "repository": "https://github.com/zhongbiran/code-team",
+  "license": "MIT",
+  "keywords": [
+    "agent",
+    "orchestration",
+    "codex",
+    "multi-agent",
+    "workflow"
+  ],
+  "extensions": {
+    "com.minimax.code": {
+      "displayName": "Code Team",
+      "icon": "icon.png",
+      "darkIcon": "icon-dark.png",
+      "category": "Code",
+      "exampleQueries": [
+        "用 Code Team 实现用户导出功能",
+        "Code Team 规划一下这个重构，然后并行做"
+      ],
+      "minimaxManifest": ".minimax-plugin/plugin.json"
+    }
+  }
+}

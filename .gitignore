@@ -1,7 +1,7 @@
 # 运行时数据：每次调用都在变，不进版本库
-plugin/config/events.jsonl
-plugin/config/usage-ledger.json
-plugin/config/lessons.json
+config/events.jsonl
+config/usage-ledger.json
+config/lessons.json
 
 # 临时文件
 tmp-*

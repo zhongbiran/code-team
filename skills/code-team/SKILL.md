@@ -49,6 +49,25 @@ subagent-split-check、evidence-first-review、review-capacity-check 等）。
 Code Team 是**编排层**，不复制这些 skill，只在流程里调用它们。提纯对照见
 `references/official-stack-distilled.md`。
 
+## 路径约定
+
+本插件的脚本、配置、检查都在**插件根目录**（与 `skills/` 平级）：
+
+```text
+<插件根>/
+├── plugin.agent-plugins.json   Agent Plugins 格式清单
+├── .minimax-plugin/            MiniMax 格式清单
+├── skills/code-team/SKILL.md   本 skill
+├── scripts/                    codex-team / record-event / lessons / bootstrap / rebuild
+├── checks/                     自动检查脚本
+├── config/                     team.json（角色配置）、events.jsonl（事件流）
+└── references/                 方法论与架构文档
+```
+
+下面所有 `node scripts/xxx.mjs` 都**从插件根目录执行**。
+插件根位置：Windows 是 `%USERPROFILE%\.minimax\plugins\code-team`，
+其他平台按各自的插件目录。
+
 ## 第 0 步：后端就绪检查（首次或换项目时做一次）
 
 Overmind / Coder 的后端可以是 Codex CLI，也可以是 MCode 自身的子代理
