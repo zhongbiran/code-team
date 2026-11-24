@@ -27,7 +27,6 @@
 | `checks/` | 自动检查脚本（自我提升的产物） |
 | `config/` | team.json（角色配置）、events.jsonl（事件流） |
 | `references/` | 方法论与架构文档 |
-| `miniapps/code-team-board/` | Code Team 控制台（MiniApp：诊断 + 统计 + 配置） |
 | `docs/` | 调研与设计文档 |
 | `research/` | MiniMax Code 官方博客原文（12 篇） |
 
@@ -132,6 +131,18 @@ node scripts/lessons.mjs check                  # 跑所有检查
 gh auth login --hostname github.com --git-protocol https --web   # 浏览器里授权一次
 node scripts/publish-github.mjs                                   # 建仓库 + 推送
 node scripts/publish-github.mjs --private                        # 建私有仓库
+```
+
+## 控制台（独立仓库）
+
+可视化控制台是**另一个仓库**：`code-team-board`。
+
+原因：MiniMax Code 的插件读取顺序是「先试根 `plugin.json`（Agent Plugins 格式），
+成功就用它」——而 Agent Plugins 格式**不认 MiniApp**。两份清单放一个包里，
+Agent Plugins 会赢，控制台的 MiniApp 就不被识别了。拆开最干净。
+
+```
+https://github.com/zhongbiran/code-team-board
 ```
 
 ## 文档
