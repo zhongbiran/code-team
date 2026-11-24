@@ -25,6 +25,41 @@ description: 多 Agent 协作工作流入口。决策权在 Overmind（后端可
 
 向用户回复时用显示名（Overmind / Coder / Worker / Explore / Verifier）；`agent_name` 只用于 Task 工具参数。
 
+### skill 分工：谁该用什么方法论
+
+**名单在 `config/team.json` 每个角色的 `skills` 字段里，不写死在流程里。**
+改名单只改配置，不改脚本。
+
+| 角色 | 侧 | 该用的 skill | 为什么 |
+|---|---|---|---|
+| **Overmind** | Codex | `superpowers:brainstorming`、`superpowers:writing-plans`、`planning-with-files` | 需求澄清与方案收敛靠 brainstorming；拆包前先落一份文件化计划（planning-with-files 用 task_plan.md / findings.md 当外部记忆），长上下文不靠脑内记 |
+| **Coder** | Codex | `superpowers:systematic-debugging`、`planning-with-files` | 定位核心问题要按"假设→证伪"走，别直接猜修法 |
+| **Worker** | MCode | `superpowers:test-driven-development`、`superpowers:verification-before-completion` | 先写测试再实现；宣称做完前必须跑验证命令 |
+| **Explore** | MCode | 无 | 只读取证，不需要方法论流程 |
+| **Verifier** | MCode | `superpowers:verification-before-completion`、`superpowers:requesting-code-review` | 验收要证据（跑过的命令与输出），不是读总结 |
+
+**本机已装的两套 skill（实测可见名）**
+
+- Codex 侧：`superpowers:` 前缀的官方版 15 个（v7.0.1）+ `planning-with-files`
+- MCode 侧：`superpowers:` 前缀 14 个（v6.2.8）+ `context-engineering:` 19 个
+  （MuratcanKoylan/Agent-Skills-for-Context-Engineering，MIT——上下文工程 / harness 工程 /
+  多智能体架构，用于设计或改造 agent 系统本身，不是执行规范）
+- **两侧名字不同**：Codex 侧平铺进 `~/.codex/skills/` 的 skill 是裸名，
+  MCode 侧插件里的带 `插件名:` 前缀。`config/team.json` 里按角色所在侧写对应名字。
+- **同名旧版已移除**：`~/.agents/skills/` 里原有 v1.9.1 中文裸名版
+  （`writing-plans` 等）。实测 Codex 侧两套同名并存时，模型优先选裸名旧版，
+  于是新版的流程与 hooks 一直没生效。隔离副本在
+  `workspace/_skilltmp/legacy-superpowers-zh/`，要恢复就移回 `~/.agents/skills/`。
+
+**点名是必要的**：同名 skill 并存时模型不会自己判断哪个更新。
+所以点名由脚本做（见下面第 2、6 步），不靠模型自觉。
+
+**Codex 侧的 skill 列表有上下文预算上限**（实测）：往 `~/.codex/skills/` 平铺 19 个
+描述较长的 skill 后，可见列表从 53 条缩到 34 条——按字母序排到 `v` 就断了，
+`superpowers:` 整组和 `work-pets:` 全部消失。所以 **Codex 侧不要平铺大批 skill**，
+要么走插件形式（带前缀、描述精简），要么少放。
+`context-engineering` 因此只装 MCode 侧（用户 `@context-engineering:multi-agent-patterns` 直接用）。
+
 ### 主会话的权限边界（关键）
 
 主会话**不做**这些判断，因为主会话用的是执行级模型（现为 M3.1 Flash）：
@@ -114,6 +149,12 @@ systematic-debugging / executing-plans / dispatching-parallel-agents / test-driv
 verification-before-completion / subagent-driven-development / using-git-worktrees 等），
 外加 Codex 自带的系统 skill。**这些是决策质量的一部分，别在契约里禁用它们。**
 
+`scripts/codex-team.mjs` 每次调用都会把 `config/team.json` 里该角色的 `skills`
+自动追加成一段"本次可用 skill（命中才用）"。**你不用手动点名。**
+
+实测过的坑：同名 skill 并存时模型会挑旧的（裸名中文版没有新版的流程与 hooks）。
+点名后它才用指定版本——所以点名交给脚本，不靠模型自觉。
+
 反过来说：**主会话自己不要用这些 skill 去做决策**——主会话只有执行级模型，
 它的"方法论"不如 Overmind 用的那些可靠。
 
@@ -171,6 +212,14 @@ node scripts/codex-team.mjs plan --prompt-file <追加内容.md> --role overmind
 - 只读取证用 `agent_name="explore"`
 - brief 必须写死：目标、已有事实、精确到文件的改动清单、验收命令、文件归属
 - 单包控制在 20 分钟内；超过就拆细
+- **把该角色的 skill 提示原样贴进 Task prompt 末尾**（机械动作，不做判断）：
+
+```bash
+node scripts/skills-for.mjs worker     # 换成实际派给的角色
+```
+
+输出形如 `可用 skill（命中才用，先加载再动手）：superpowers:test-driven-development、...`。
+角色取自 Overmind brief 里的 `Role:` 栏——**Role 栏由 Overmind 填，你不判断谁来做**。
 
 **派工前后各记一条事件**（这是"哪些任务、哪些 skill 调用了多少次、耗时多少"的唯一来源）：
 
@@ -282,4 +331,6 @@ node scripts/lessons.mjs promote <ID>            # 升级为检查（写到 chec
 - 重要状态（计划、决定、验收结论）落盘，不只活在对话里
 - 每条结论要么有证据，要么标注是假设
 - 方法论判据用官方 mcode-stack 的 skill（已装在 `mcode` 插件里），别自己重写一套
+- 改 `config/team.json` 的 skill 名单后跑 `node checks/skills-exist.mjs`：
+  **skill 名写错是隐形失败**——流程照跑不报错，只是方法论从没被加载过
 - Codex 规划期不写实现代码；实现只由 Worker 做

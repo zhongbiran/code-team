@@ -141,17 +141,33 @@ const OVERMIND_CONTRACT = [
   "    Stakes: low | high",
   "    Hypothesis: <你对这个包的预判>",
   "    Goal / users / out of scope: ...",
-  "    Done = (tangible check): <一条能跑的命令 + 期望输出>",
+  "    Done = (tangible check): <一条能跑命令 + 期望输出>",
+  "    Role: worker | explore | verifier  （这包交给谁执行）",
   "    Mode: think with me | do it for me",
   "    When done: show commands run and their output first, then the summary,",
   "    then the decisions and assumptions you made.",
   "",
   "注意 Done 栏只给\"一条命令 + 期望输出\"，不要穷举该测什么——测什么由执行者判断。",
   "",
+  "Role 栏必须写明这包交给谁（worker / explore / verifier）：派工会按它取该角色该用的 skill，",
+  "写错会让执行者用错方法（比如让只读的 explore 去改代码）。",
+  "",
   "## 需要 Coder 的部分",
   "如果要动代码方向（接口设计、实现取舍、核心问题定位），在这里指明哪几包需要 Coder 介入。",
   ""
 ].join("\n");
+
+// 该角色该用的 skill 清单。写成"命中才用"而不是"全用"——
+// 点名的目的是消歧（同名旧版与官方版并存时模型会选错），不是强行走完整流程。
+function skillSection(skills) {
+  return [
+    "",
+    "## 本次可用 skill",
+    "任务匹配时，先加载对应 skill 再动手（命中才用，不要全用）：",
+    ...skills.map((s) => "- " + s),
+    ""
+  ].join("\n");
+}
 
 function runPlan(args) {
   const role = args.role;
@@ -183,6 +199,17 @@ function runPlan(args) {
   // 契约是流程骨架（决策/拆包/brief/是否要 Coder），不受 --plain 影响。
   // --plain 只控制"要不要结构化 JSON 输出"，不控制"要不要给下游用的骨架"。
   if (role === "overmind") prompt = prompt + "\n" + OVERMIND_CONTRACT;
+  // 点名该角色该用的 skill。实测：Codex 侧同名 skill 的旧中文版与官方版并存时，
+  // 模型倾向选旧的，不点名就会一直用旧流程。
+  const skills = Array.isArray(roleCfg.skills) ? roleCfg.skills : [];
+  if (skills.length) prompt = prompt + "\n" + skillSection(skills);
+
+  // --print-prompt：只打印拼好的 prompt，不发请求、不记事件。
+  // 用来零成本验证"注入的内容对不对"，不用真烧一次额度。
+  if (args["print-prompt"]) {
+    console.log(prompt);
+    process.exit(0);
+  }
 
   // codex 的全局选项必须排在子命令之前，exec 的选项排在其后。
   const globalArgs = [...providerArgs(cfg), "-m", model, "-c", `model_reasoning_effort="${effort}"`];

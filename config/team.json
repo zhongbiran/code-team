@@ -7,6 +7,11 @@
       "model": "gpt-6.2-astra",
       "effort": "medium",
       "agent": null,
+      "skills": [
+        "superpowers:brainstorming",
+        "superpowers:writing-plans",
+        "planning-with-files"
+      ],
       "note": "总脑：所有非代码决策（方案、拆包、每个包的 brief）都在这里做。"
     },
     "coder": {
@@ -16,6 +21,10 @@
       "model": "gpt-6.2-sol",
       "effort": "medium",
       "agent": null,
+      "skills": [
+        "superpowers:systematic-debugging",
+        "planning-with-files"
+      ],
       "note": "代码方向决策：接口设计、实现取舍、核心问题定位。不写业务代码。"
     },
     "worker": {
@@ -25,6 +34,10 @@
       "model": "minimax/MiniMax-M3.1-Flash",
       "effort": null,
       "agent": "worker",
+      "skills": [
+        "superpowers:test-driven-development",
+        "superpowers:verification-before-completion"
+      ],
       "note": "主力实现，按 Overmind 写的 brief 执行，可多开并行。"
     },
     "explore": {
@@ -34,6 +47,7 @@
       "model": "minimax/MiniMax-M3.1-Flash",
       "effort": null,
       "agent": "explore",
+      "skills": [],
       "note": "只读取证与定位，不改文件。"
     },
     "verifier": {
@@ -43,6 +57,10 @@
       "model": "minimax/MiniMax-M3.1-Flash",
       "effort": null,
       "agent": "verifier",
+      "skills": [
+        "superpowers:verification-before-completion",
+        "superpowers:requesting-code-review"
+      ],
       "note": "独立验收，干净 context，只做一次。"
     }
   },
