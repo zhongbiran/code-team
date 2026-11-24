@@ -49,12 +49,13 @@ node scripts/install-plugin.mjs --dry-run  # 只看会装什么
 装完打开 `/plugins` 按 `Ctrl+R` 刷新，找到 Code Team 按空格启用。
 **重开一个会话**，skill 才会出现在可用列表里。
 
-### 2. 控制台（可选）
+### 2. 控制台（可选，另一个仓库）
 
-控制台的 MiniApp 包在 `miniapps/code-team-board/`。它读的是插件目录里的事件流，
-所以**必须先装插件**，控制台才有数据。
+控制台在独立仓库：`https://github.com/zhongbiran/code-team-board`。
 
-在 MiniMax Code 里对 Agent 说「把这个目录做成 Mini App」，
+它读插件目录里的事件流，所以**必须先装插件**，控制台才有数据。
+
+在 MiniMax Code 里对 Agent 说「把 code-team-board 仓库做成 Mini App」，
 或者用 `/miniapp-creator` 指向该目录。
 
 ## 角色配置

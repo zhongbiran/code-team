@@ -37,7 +37,7 @@ function walk(dir, base = dir) {
   return out;
 }
 
-// 只装插件组件，docs/ research/ miniapps/ 这些是仓库内容，不是插件运行时。
+// 只装插件组件，docs/ research/ 这些是仓库内容，不是插件运行时。
 const PLUGIN_PARTS = new Set([".minimax-plugin", "skills", "checks", "scripts", "references", "config", "plugin.json", "icon.png", "icon-dark.png", "LICENSE"]);
 const all = walk(SRC).filter((f) => PLUGIN_PARTS.has(f.replace(/\\/g, "/").split("/")[0]));
 const files = all.filter((f) => !RUNTIME_DATA.has(f.replace(/\\/g, "/")));
