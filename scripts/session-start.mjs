@@ -13,10 +13,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { codexReadiness } from "./codex-bootstrap.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const CONFIG = join(ROOT, "config", "team.json");
-// 与 scripts/codex-team.mjs 同义：事件流与规划输出 schema 的真实位置。
-const EVENTS_FILE = join(ROOT, "config", "events.jsonl");
-const SCHEMA_FILE = join(ROOT, "config", "plan-schema.json");
+// 与 scripts/codex-team.mjs 认同一套隔离开关：验收要能只换配置、不碰真实运行态。
+const CONFIG = process.env.CODE_TEAM_CONFIG || join(ROOT, "config", "team.json");
+const EVENTS_FILE = process.env.CODE_TEAM_EVENTS || join(ROOT, "config", "events.jsonl");
+const SCHEMA_FILE = process.env.CODE_TEAM_SCHEMA || join(ROOT, "config", "plan-schema.json");
 const BOOTSTRAP = join(ROOT, "scripts", "codex-bootstrap.mjs");
 const DECISION_ROLES = ["overmind", "coder"];
 

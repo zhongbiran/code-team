@@ -10,6 +10,7 @@
 //
 // 全部验证都在临时目录里跑：不碰本机插件安装目录，不碰本机运行时数据。
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -56,6 +57,11 @@ function cleanup() {
 function isolatedEnv(home, extra = {}) {
   const env = { ...process.env };
   delete env.CODEX_HOME;
+  // 隔离开关由每个用例自己给，不继承外部环境。
+  delete env.CODE_TEAM_CONFIG;
+  delete env.CODE_TEAM_EVENTS;
+  delete env.CODE_TEAM_SCHEMA;
+  delete env.CODE_TEAM_LEDGER;
   env.USERPROFILE = home;
   env.HOME = home;
   env.APPDATA = join(home, "AppData", "Roaming");
@@ -70,8 +76,9 @@ function runNode(args, env) {
   return spawnSync(process.execPath, args, { encoding: "utf8", env, cwd: ROOT });
 }
 
-// 宿主保证会替换的占位符。只有它能用；别的名字宿主不保证替换，
-// 命令会带着字面占位符执行，hook 静默失败。
+// 占位符白名单：只放 CLAUDE_PLUGIN_ROOT——插件来源 hook 的 env 里确实有它。
+// 踩坑：asar 里搜不到字面量 "${CLAUDE_PLUGIN_ROOT}"，也没有 Ds3 这个函数；
+// 按"搜字面量"下结论会误判成"宿主不认这个占位符"。
 const HOST_PLACEHOLDER = "${CLAUDE_PLUGIN_ROOT}";
 function checkHookCommand(label, text) {
   if (typeof text !== "string" || !text) {
@@ -79,14 +86,14 @@ function checkHookCommand(label, text) {
     return;
   }
   if (!text.includes(HOST_PLACEHOLDER)) {
-    fail("hook-placeholder-" + label, "没有用宿主保证替换的 " + HOST_PLACEHOLDER + "：" + text);
+    fail("hook-placeholder-" + label, "没有用插件 hook 的 env 里确实注入的 " + HOST_PLACEHOLDER + "：" + text);
   } else {
     ok("hook-placeholder-" + label, HOST_PLACEHOLDER);
   }
   const tokens = [...text.matchAll(/\$\{([A-Z_][A-Z0-9_]*)\}/g)].map((m) => m[1]);
   const bad = tokens.filter((t) => t !== "CLAUDE_PLUGIN_ROOT");
   if (bad.length) {
-    fail("hook-placeholder-only-" + label, "命令里还有宿主不保证替换的占位符：" + bad.map((t) => "${" + t + "}").join(", "));
+    fail("hook-placeholder-only-" + label, "命令里还有别的占位符（只认 " + HOST_PLACEHOLDER + "）：" + bad.map((t) => "${" + t + "}").join(", "));
   } else {
     ok("hook-placeholder-only-" + label, "只用了宿主保证的占位符");
   }
@@ -139,8 +146,10 @@ if (!existsSync(HOOK_DOC)) {
       else fail("hook-command", "SessionStart 命令没有指向 scripts/session-start.mjs：" + cmd.command);
       if (cmd.timeout === undefined || (cmd.timeout >= 1 && cmd.timeout <= 10)) ok("hook-timeout", "timeout=" + (cmd.timeout ?? "默认 5"));
       else fail("hook-timeout", "timeout 必须在 1..10 秒内，实际 " + cmd.timeout);
-      // 宿主只保证替换 CLAUDE_PLUGIN_ROOT（app.asar 的插件命令替换分支）。
-      // 用别的占位符名，命令会字面执行，hook 静默失效。
+      // 占位符：宿主按通用 ${NAME} 展开 env 变量（expandHookPlaceholders(value, env)，
+      // 正则 /\$\{([A-Z][A-Z0-9_]*)\}/gu）；插件来源的 hook 拿到的 env 里带 CLAUDE_PLUGIN_ROOT
+      // （另有 MINIMAX_PLUGIN_ROOT / PLUGIN_ROOT / CODEX_PLUGIN_ROOT）。
+      // 只认 CLAUDE_PLUGIN_ROOT：它是插件 hook 这条路上确实注入的那个。
       checkHookCommand("command", cmd.command);
       // commandWindows 是宿主认的字段（parser 的 commandValue 在 win32 上优先取它）。
       if (cmd.commandWindows === undefined) ok("hook-command-windows", "未声明 commandWindows（Windows 上用 command 里的正斜杠路径）");
@@ -223,46 +232,82 @@ if (!existsSync(SESSION_START)) {
 // --- 5. localContext 键表（契约 1） ---
 // 造一个假的后端模块，录下 session-start 传进来的 localContext，验四个必需键。
 {
-  const fakeRoot = tempDir("ctxroot");
-  mkdirSync(join(fakeRoot, "scripts"), { recursive: true });
-  mkdirSync(join(fakeRoot, "config"), { recursive: true });
-  for (const f of ["session-start.mjs", "codex-bootstrap.mjs"]) {
-    cpSync(join(ROOT, "scripts", f), join(fakeRoot, "scripts", f), { recursive: true });
-  }
-  cpSync(join(ROOT, "config", "team.json"), join(fakeRoot, "config", "team.json"), { recursive: true });
-  const capture = join(fakeRoot, "captured.json");
-  writeFileSync(
-    join(fakeRoot, "scripts", "decision-backend.mjs"),
-    [
-      'import { writeFileSync } from "node:fs";',
-      'export function preflight(role, roleConfig, localContext) {',
-      '  writeFileSync(process.env.CT_CAPTURE, JSON.stringify(localContext));',
-      '  return { status: "ready", checks: [{ id: "fake", status: "ok", detail: "fake" }], nextStep: null };',
-      '}',
-      '',
-    ].join("\n"),
-    "utf8"
-  );
-  const ctxHome = fakeCodexHome("ctxhome");
-  const res = runNode([join(fakeRoot, "scripts", "session-start.mjs"), "--json"], isolatedEnv(ctxHome, { CT_CAPTURE: capture }));
-  let ctx = null;
-  try { ctx = JSON.parse(readFileSync(capture, "utf8")); } catch {}
+  // 假插件根 + 假后端模块：录下 session-start 真传出去的 localContext。
+  const captureLocalContext = (extraEnv) => {
+    const fakeRoot = tempDir("ctxroot");
+    mkdirSync(join(fakeRoot, "scripts"), { recursive: true });
+    mkdirSync(join(fakeRoot, "config"), { recursive: true });
+    for (const f of ["session-start.mjs", "codex-bootstrap.mjs"]) {
+      cpSync(join(ROOT, "scripts", f), join(fakeRoot, "scripts", f), { recursive: true });
+    }
+    cpSync(join(ROOT, "config", "team.json"), join(fakeRoot, "config", "team.json"), { recursive: true });
+    const capture = join(fakeRoot, "captured.json");
+    writeFileSync(
+      join(fakeRoot, "scripts", "decision-backend.mjs"),
+      [
+        'import { writeFileSync } from "node:fs";',
+        'export function preflight(role, roleConfig, localContext) {',
+        '  writeFileSync(process.env.CT_CAPTURE, JSON.stringify(localContext));',
+        '  return { status: "ready", checks: [{ id: "fake", status: "ok", detail: "fake" }], nextStep: null };',
+        '}',
+        '',
+      ].join("\n"),
+      "utf8"
+    );
+    const ctxHome = fakeCodexHome("ctxhome");
+    const res = runNode([join(fakeRoot, "scripts", "session-start.mjs"), "--json"], isolatedEnv(ctxHome, { CT_CAPTURE: capture, ...extraEnv }));
+    let ctx = null;
+    try { ctx = JSON.parse(readFileSync(capture, "utf8")); } catch {}
+    return { ctx, res, fakeRoot };
+  };
+
+  const base = captureLocalContext({});
+  const ctx = base.ctx;
   if (!ctx) {
-    fail("localcontext-keys", "没录到传给后端的 localContext：" + (res.stderr || "").trim().split(/\r?\n/)[0]);
+    fail("localcontext-keys", "没录到传给后端的 localContext：" + (base.res.stderr || "").trim().split(/\r?\n/)[0]);
   } else {
     const required = ["config", "cwd", "eventsFile", "schemaFile"];
     const missing = required.filter((k) => !(k in ctx));
     if (missing.length) fail("localcontext-keys", "localContext 缺键：" + missing.join(", ") + "（契约 1 要求 config/cwd/eventsFile/schemaFile）");
     else ok("localcontext-keys", required.join(", "));
-    if (ctx.eventsFile === join(fakeRoot, "config", "events.jsonl")) ok("localcontext-events-file", "config/events.jsonl");
+    if (ctx.eventsFile === join(base.fakeRoot, "config", "events.jsonl")) ok("localcontext-events-file", "config/events.jsonl");
     else fail("localcontext-events-file", "eventsFile 不是插件根下的 config/events.jsonl：" + ctx.eventsFile);
-    if (ctx.schemaFile === join(fakeRoot, "config", "plan-schema.json")) ok("localcontext-schema-file", "config/plan-schema.json");
+    if (ctx.schemaFile === join(base.fakeRoot, "config", "plan-schema.json")) ok("localcontext-schema-file", "config/plan-schema.json");
     else fail("localcontext-schema-file", "schemaFile 不是插件根下的 config/plan-schema.json：" + ctx.schemaFile);
     if (ctx.config && ctx.config.roles) ok("localcontext-config", "config 是完整 team.json");
     else fail("localcontext-config", "config 不是完整的 team.json 对象");
     if (typeof ctx.cwd === "string" && ctx.cwd) ok("localcontext-cwd", ctx.cwd);
     else fail("localcontext-cwd", "cwd 不是字符串路径");
   }
+
+  // 隔离开关：CODE_TEAM_EVENTS / CODE_TEAM_SCHEMA 与 codex-team.mjs 同一套。
+  const ev = join(tempDir("evt"), "events.jsonl");
+  const sc = join(tempDir("sch"), "plan-schema.json");
+  const swapped = captureLocalContext({ CODE_TEAM_EVENTS: ev, CODE_TEAM_SCHEMA: sc }).ctx;
+  if (swapped && swapped.eventsFile === ev) ok("isolate-events-file", "认 CODE_TEAM_EVENTS");
+  else fail("isolate-events-file", "认不了 CODE_TEAM_EVENTS：" + (swapped ? swapped.eventsFile : "没录到 localContext"));
+  if (swapped && swapped.schemaFile === sc) ok("isolate-schema-file", "认 CODE_TEAM_SCHEMA");
+  else fail("isolate-schema-file", "认不了 CODE_TEAM_SCHEMA：" + (swapped ? swapped.schemaFile : "没录到 localContext"));
+}
+
+// --- 5b. CODE_TEAM_CONFIG：预检必须读替身配置，不是真实配置 ---
+// 替身里把 provider.id 改掉，用它区分读到的是哪一份。真实 config/team.json 只读比对。
+{
+  const realPath = join(ROOT, "config", "team.json");
+  const before = createHash("sha256").update(readFileSync(realPath)).digest("hex");
+  const sub = JSON.parse(readFileSync(realPath, "utf8"));
+  sub.provider = { ...(sub.provider ?? {}), id: "isolated-provider" };
+  const subPath = join(tempDir("cfgswap"), "team.json");
+  writeFileSync(subPath, JSON.stringify(sub, null, 2), "utf8");
+  const res = runNode([SESSION_START, "--json"], isolatedEnv(fakeCodexHome("cfghost"), { CODE_TEAM_CONFIG: subPath }));
+  let out = null;
+  try { out = JSON.parse(res.stdout); } catch {}
+  const providerDetail = ((out && out.checks) || []).map((c) => c.detail).find((d) => typeof d === "string" && d.startsWith("provider="));
+  if (providerDetail === "provider=isolated-provider") ok("isolate-config", "认 CODE_TEAM_CONFIG，预检读的是替身配置");
+  else fail("isolate-config", "设了 CODE_TEAM_CONFIG，预检仍读真实配置：" + providerDetail);
+  const after = createHash("sha256").update(readFileSync(realPath)).digest("hex");
+  if (before === after) ok("isolate-config-readonly", "真实 config/team.json 未被改动");
+  else fail("isolate-config-readonly", "真实 config/team.json 被改动了");
 }
 
 // --- 6. 安装保全 ---
