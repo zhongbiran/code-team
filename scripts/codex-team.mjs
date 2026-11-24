@@ -170,7 +170,13 @@ function runPlan(args) {
   }
 
   const cfg = loadConfig();
-  const roleCfg = cfg[role];
+  // 配置两种形态都认：新的 { roles: { overmind: {...} } }，旧的 { overmind: {...} }。
+  // 认旧形态是为了让改配置前装好的插件不会因为结构升级直接崩掉。
+  const roleCfg = cfg.roles?.[role] ?? cfg[role];
+  if (!roleCfg) {
+    console.error(`team.json 里没有角色 "${role}" 的配置`);
+    process.exit(2);
+  }
   const model = args.model ?? roleCfg.model;
   const effort = args.effort ?? roleCfg.effort;
   let prompt = readFileSync(promptPath, "utf8");
