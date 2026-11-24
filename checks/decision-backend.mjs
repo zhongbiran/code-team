@@ -248,6 +248,54 @@ const preflight = spawnSync(
 check("预检可用且给出结论", (preflight.stdout || "").includes('"status"'), (preflight.stdout || "").slice(0, 200) + (preflight.stderr || "").slice(0, 200));
 check("预检期间启动次数为 0", launches().length === beforePreflight, `多启动了 ${launches().length - beforePreflight} 次`);
 
+// 11. 命令行记事件：路径能被环境变量改写，契约 2 的新字段要认。
+//     这两条曾经都坏过：--kind 被忽略，CLI 还死盯着仓库里的真实事件流。
+const CLI_EVENTS = join(DIR, "cli-events.jsonl");
+const realEventsBeforeCli = existsSync(REAL_EVENTS) ? createHash("sha256").update(readFileSync(REAL_EVENTS)).digest("hex") : null;
+const recordCli = (extraArgs) =>
+  spawnSync(process.execPath, [join(ROOT, "scripts", "record-event.mjs"), "record", ...extraArgs], {
+    encoding: "utf8",
+    env: { ...process.env, CODE_TEAM_EVENTS: CLI_EVENTS },
+  });
+recordCli([
+  "--kind", "dispatch", "--role", "worker", "--agent", "worker",
+  "--invocation-id", "inv-cli-1", "--status", "started",
+  "--requested-model", "m-1", "--requested-effort", "high",
+]);
+recordCli([
+  "--kind", "call", "--role", "overmind", "--backend", "codex-cli",
+  "--invocationId", "inv-cli-2", "--status", "failed", "--call-mode", "new",
+  "--error-code", "NONZERO_EXIT", "--requested-model", "m-2", "--requested-effort", "medium",
+]);
+const cliEvents = existsSync(CLI_EVENTS)
+  ? readFileSync(CLI_EVENTS, "utf8").split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l))
+  : [];
+check("CLI 记的事件落在 CODE_TEAM_EVENTS 指的临时文件", cliEvents.length === 2, `临时文件里有 ${cliEvents.length} 条`);
+const realEventsAfterCli = existsSync(REAL_EVENTS) ? createHash("sha256").update(readFileSync(REAL_EVENTS)).digest("hex") : null;
+check("CLI 没写真实事件流", realEventsBeforeCli === realEventsAfterCli);
+if (cliEvents.length === 2) {
+  check("--kind dispatch 真的产生 kind=dispatch", cliEvents[0].kind === "dispatch", JSON.stringify(cliEvents[0]));
+  check(
+    "CLI 认得契约 2 的新字段",
+    cliEvents[0].invocationId === "inv-cli-1"
+      && cliEvents[0].agent === "worker"
+      && cliEvents[0].status === "started"
+      && cliEvents[0].requestedModel === "m-1"
+      && cliEvents[0].requestedEffort === "high",
+    JSON.stringify(cliEvents[0])
+  );
+  check(
+    "CLI 认得 --call-mode 与 --error-code",
+    cliEvents[1].callMode === "new" && cliEvents[1].errorCode === "NONZERO_EXIT" && cliEvents[1].invocationId === "inv-cli-2",
+    JSON.stringify(cliEvents[1])
+  );
+}
+const cliList = spawnSync(process.execPath, [join(ROOT, "scripts", "record-event.mjs"), "list"], {
+  encoding: "utf8",
+  env: { ...process.env, CODE_TEAM_EVENTS: CLI_EVENTS },
+});
+check("CLI list 也读临时文件", (cliList.stdout || "").includes("inv-cli-1"), (cliList.stdout || "").slice(0, 120));
+
 console.log("");
 if (failures) {
   console.log(failures + " 条检查未通过");

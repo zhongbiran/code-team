@@ -10,16 +10,22 @@
 //   project, task, skill, plugin,   <- 归因维度：哪个项目、哪个任务、哪个 skill
 //   elapsedSec, usage{...}, ok, note
 // }
+// 决策调用另有契约 2 的新字段：invocationId、agent、requestedModel、requestedEffort、
+// callMode、status、errorCode（外加 errorMessage、threadId、continuation）。
+//
+// 事件流路径可以用 CODE_TEAM_EVENTS 指走别处。测试与验收必须指到临时目录，
+// 不然一次随手 record 就把真实运行态污染了。
 //
 // 用法：
-//   node scripts/record-event.mjs --role overmind --backend codex-cli --model gpt-6.2-astra ...
-//   node scripts/record-event.mjs --list
+//   node scripts/record-event.mjs record --role overmind --backend codex-cli --model gpt-6.2-astra ...
+//   node scripts/record-event.mjs list
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const LEDGER = join(ROOT, "config", "events.jsonl");
+// 事件流默认在仓库里，但可以被环境变量指走别处（测试、验收、隔离运行）。
+const LEDGER = process.env.CODE_TEAM_EVENTS || join(ROOT, "config", "events.jsonl");
 
 function parseArgs(argv) {
   const out = { _: [] };
@@ -85,6 +91,24 @@ export function readEvents(file = LEDGER) {
     .filter(Boolean);
 }
 
+// 命令行参数名 -> 事件字段名。参数用连字符风格（跟 --elapsed-sec 一致），
+// 落到事件里用契约的 camelCase。两种拼法都收，免得调用方按契约名写参数时踩空。
+const CLI_FIELDS = {
+  kind: "kind",
+  "invocation-id": "invocationId",
+  invocationId: "invocationId",
+  agent: "agent",
+  status: "status",
+  "call-mode": "callMode",
+  callMode: "callMode",
+  "error-code": "errorCode",
+  errorCode: "errorCode",
+  "requested-model": "requestedModel",
+  requestedModel: "requestedModel",
+  "requested-effort": "requestedEffort",
+  requestedEffort: "requestedEffort",
+};
+
 // 只有直接运行时才执行 CLI；被 import 时（codex-team.mjs）只提供函数。
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
@@ -98,7 +122,15 @@ if (args._[0] === "list") {
   if (args.usage) {
     try { usage = JSON.parse(args.usage); } catch { usage = null; }
   }
+  // 这些字段没给就不写，免得老事件凭空多出一堆 null。
+  const extra = {};
+  for (const [arg, field] of Object.entries(CLI_FIELDS)) {
+    const value = args[arg];
+    if (value === undefined || value === true) continue;
+    extra[field] = value;
+  }
   recordEvent({
+    ...extra,
     role: args.role,
     backend: args.backend,
     model: args.model,
@@ -117,6 +149,8 @@ if (args._[0] === "list") {
 } else {
   console.log("用法:");
   console.log("  record-event.mjs record --role <r> --backend <b> --model <m> [--effort e] [--project p] [--session s] [--task t] [--skill s] [--plugin pl] [--elapsed-sec n] [--usage json] [--ok true|false] [--note text]");
+  console.log("  record-event.mjs record --kind <call|dispatch> [--invocation-id <id>] [--agent <a>] [--status <s>] [--call-mode <new|resume>] [--error-code <code>] [--requested-model <m>] [--requested-effort <e>]");
   console.log("  record-event.mjs list");
+  console.log("事件流路径：CODE_TEAM_EVENTS 环境变量可覆盖（默认 config/events.jsonl）");
 }
 }

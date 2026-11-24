@@ -33,6 +33,12 @@ export function resolveDataDir(explicit) {
     process.env.MINIMAX_DATA_DIR,
     process.env.MAVIS_DATA_DIR,
   ].filter(Boolean);
+  // 显式指定的数据目录就认它，不回退去别处找：用户说数据在这儿，就该只看这儿。
+  // 目录里没有宿主证据（config.yaml / agents/）时，报"证不出来"，
+  // 而不是悄悄换成另一台机器的目录。
+  for (const dir of explicitList) {
+    if (existsSync(dir)) return dir;
+  }
   const ancestors = [];
   let dir = ROOT;
   for (let i = 0; i < 4; i++) {
@@ -41,7 +47,7 @@ export function resolveDataDir(explicit) {
     if (parent === dir) break;
     dir = parent;
   }
-  const candidates = [...explicitList, ...ancestors, join(HOME, ".minimax"), join(HOME, ".mavis")];
+  const candidates = [...ancestors, join(HOME, ".minimax"), join(HOME, ".mavis")];
   for (const candidate of candidates) {
     if (existsSync(join(candidate, "config.yaml"))) return candidate;
   }
@@ -238,6 +244,7 @@ export function resolveCapability(role, model, effort) {
   } else {
     modelState = "confirmed";
   }
+  // 域与 capabilitiesFor 同源：同一个模型集、同一套档位来源。
 
   let effortState = "unknown";
   let effortValues = null;
@@ -260,29 +267,87 @@ export function resolveCapability(role, model, effort) {
   };
 }
 
-/** 执行角色可编辑的 model/effort 域（控制台按这个渲染）。 */
+/**
+ * 执行角色的 model/effort 能力域（契约 1 的 describe 形状）。
+ *
+ * 这是能力描述的**单一来源**：board 服务端 import 它做值域校验，
+ * `--capabilities` CLI 也调用它，两边不会各说各话。
+ *
+ * values 是本机证据能证出来的闭集；证不出来就给 null + state:"unknown"，
+ * 不猜、不放宽——放宽了 board 就会放行宿主兑现不了的值。
+ */
+export function capabilitiesFor(role, roleConfig, localContext = {}) {
+  const cfg = roleConfig ?? {};
+  const agentDef = readAgentDefinition(role);
+  const runtime = readRuntimeEvidence();
+
+  const models = new Set(runtime.models);
+  if (agentDef?.model) models.add(agentDef.model);
+  const efforts = new Set();
+  for (const options of runtime.effortOptions.values()) for (const o of options) efforts.add(o);
+
+  // effort 档位依赖具体模型：某个模型只认 on/off，另一个认 low..max。
+  // 这里给的是"任一可用模型都支持的档位"闭集；派工时 resolveCapability 会按
+  // 实际选中的模型再收紧一次。
+  const savedModel = typeof cfg.model === "string" && cfg.model ? cfg.model : null;
+  const savedEffort = typeof cfg.effort === "string" && cfg.effort ? cfg.effort : null;
+  const modelValues = models.size ? [...models] : null;
+  const effortValues = efforts.size ? [...efforts] : null;
+
+  const modelState = modelValues ? "supported" : "unknown";
+  const effortState = effortValues ? "supported" : "unknown";
+
+  // default = 当前配置里**确实能下传**的值，用的是派工那条路的同一套判定：
+  // effort 只在它所属的 model 下才算数（model=MiniMax-M3 只认 on/off，
+  // 配成 high 就下传不了）。所以 default 与实际派工结果天然一致。
+  const verdict = resolveCapability(role, savedModel, savedEffort);
+
+  return {
+    id: "mcode-agent",
+    fields: {
+      model: {
+        type: "string",
+        state: modelState,
+        nullable: true,
+        required: false,
+        default: verdict.model.state === "confirmed" ? savedModel : null,
+        values: modelValues,
+      },
+      effort: {
+        type: "string",
+        state: effortState,
+        nullable: true,
+        required: false,
+        default: verdict.effort.state === "confirmed" ? savedEffort : null,
+        values: effortValues,
+      },
+    },
+    resume: "none",
+    output: "text",
+  };
+}
+
+/**
+ * 某个模型支持哪些 effort 档位（证不出返回 null）。
+ *
+ * capabilitiesFor 的 effort 域是所有模型的并集——board 要校验
+ * "model + effort" 这一对时，必须按**选中的那个 model** 收窄，
+ * 否则 model=MiniMax-M3 配 effort=high 会被放行，派工时却又下传不了。
+ */
+export function effortValuesForModel(model) {
+  if (typeof model !== "string" || !model) return null;
+  return effortDomain(model);
+}
+
+/** 所有执行角色的能力域（控制台一次拿全）。 */
 export function describeHostCapabilities(config) {
   const roles = {};
   for (const [role, rc] of Object.entries(config?.roles ?? {})) {
     if (rc?.backend !== "mcode-agent") continue;
-    const agentDef = readAgentDefinition(role);
-    const runtime = readRuntimeEvidence();
-    const models = new Set(runtime.models);
-    if (agentDef?.model) models.add(agentDef.model);
-    const efforts = new Set();
-    for (const options of runtime.effortOptions.values()) for (const o of options) efforts.add(o);
     roles[role] = {
       backendOptions: ["mcode-agent"],
       backends: {
-        "mcode-agent": {
-          id: "mcode-agent",
-          resume: "none",
-          output: "text",
-          fields: {
-            model: { type: "string", state: "confirmed", nullable: true, required: false, default: null, values: [...models] },
-            effort: { type: "string", state: "confirmed", nullable: true, required: false, default: null, values: [...efforts] },
-          },
-        },
+        "mcode-agent": capabilitiesFor(role, rc),
       },
     };
   }
@@ -299,6 +364,7 @@ if (isMain) {
   }
 
   if (argv.includes("--capabilities")) {
+    // 与 board 走同一个 capabilitiesFor，不在这里另算一遍。
     console.log(JSON.stringify({ roles: describeHostCapabilities(teamConfig) }, null, 2));
     process.exit(0);
   }

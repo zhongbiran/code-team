@@ -55,7 +55,8 @@ Code Team 多出来的是「决策权在外部（Overmind，可换模型/可换�
 | verifier | MCode | `superpowers:verification-before-completion`、`superpowers:requesting-code-review` | 验收要证据（跑过的命令与输出），不是读总结 |
 
 名单在 `config/team.json` 每个角色的 `skills` 字段里，**不写死在流程里**。
-派工时用 `node scripts/skills-for.mjs <role>` 取当前角色的 skill 提示，原样贴进 Task prompt 末尾。
+派工时用 `node scripts/skills-for.mjs <role>` 取当前角色的 skill 提示（**方法论**），原样贴进 Task prompt 末尾；
+model / effort / agent 走 `node scripts/dispatch-params.mjs <role>`（见第五节）。
 
 **别限制 Overmind 用 Codex 侧 skill**：实测它会自己调用（设计类任务自动用
 `writing-plans`，诊断类自动用 `systematic-debugging`），并说明这些 skill 如何影响了它的
@@ -102,6 +103,16 @@ node scripts/record-event.mjs record --kind dispatch --role worker --backend mco
 node scripts/record-event.mjs record --kind dispatch-result --role worker --backend mcode-agent \
   --project <项目名> --session <主会话 id> --task <任务名> --elapsed-sec <秒> --ok true|false
 
+# 同一次调用的两条事件共用一个 invocationId（看板靠它归组成「一次调用」）
+node scripts/record-event.mjs record --kind dispatch --role worker --agent worker \
+  --invocation-id <invocationId> --status started --project <项目名> --session <主会话 id> --task <任务名>
+node scripts/record-event.mjs record --kind dispatch-result --role worker --agent worker \
+  --invocation-id <invocationId> --status succeeded --elapsed-sec <秒> --ok true --project <项目名> --task <任务名>
+
+# 隔离事件流：CODE_TEAM_EVENTS 把写与读都指到别处
+CODE_TEAM_EVENTS=<临时事件流路径> node scripts/record-event.mjs record --kind dispatch ...
+CODE_TEAM_EVENTS=<临时事件流路径> node scripts/record-event.mjs list
+
 # 自我提升与发布把关
 node scripts/lessons.mjs record "<纠正内容>"
 node scripts/lessons.mjs list
@@ -109,6 +120,14 @@ node scripts/lessons.mjs promote <ID> "<检查脚本名>" "<描述>"
 node scripts/lessons.mjs check        # 发布把关总入口
 node scripts/lessons.mjs list-checks  # 只列将要跑的检查，不执行
 ```
+
+**事件流的 CLI 参数**（连字符拼法；契约的 camelCase 拼法等价）：`--kind`、`--invocation-id`、
+`--agent`、`--status`、`--call-mode`、`--error-code`、`--requested-model`、`--requested-effort`。
+完整参数表与取值见 `references/codex-invocation.md`（§命令行记事件）——**只维护那一份**。
+
+**`CODE_TEAM_EVENTS` 覆盖事件流路径，写与读都覆盖。**
+只隔离写不隔离读是个更坑的陷阱：`list` 会把真实运行态读出来，测试结论全错。
+测试与验收一律把它指到临时目录；别的隔离开关（配置、账本、schema）也在同一份文档里。
 
 需求文件写**用户原话**。不要替用户改写、补全或「优化」措辞——
 主会话的理解不如 Overmind 准，用户没说的让 Overmind 去问、去假设并在方案里标出来。
@@ -129,7 +148,7 @@ node scripts/dispatch-params.mjs --capabilities                          # 宿�
 
 | 字段 | 意思 |
 |---|---|
-| `invocationId` | 本次派工的标识，记事件时带上，便于把派工参数与事件对上 |
+| `invocationId` | 本次派工的标识；记事件时用 `--invocation-id` 带上，看板靠它把同一次调用的多条事件归成一次（参数表见 `references/codex-invocation.md`） |
 | `role` / `backend` / `agent` | 角色、后端、执行角色的 agent 标识（决策角色的 `agent` 是 `null`） |
 | `model` / `effort` | **已证实可下传**的值；置空表示这一项没下传 |
 | `requested` | 配置里保存的原值（`model`/`effort`），即使没下传也保留在这里供展示 |
@@ -167,6 +186,7 @@ node scripts/skills-for.mjs worker --direction frontend --visible-file <会话�
   stdout 不出半截结果。
 - `dispatch-params.mjs --direction <id> --visible-file <json>` 把同一个 specialty 放进
   `attachment.specialty`，派工时照抄它即可。
+
 ## 六、事件流字段
 
 - `--project`：当前工作目录的仓库名（项目根目录名）
@@ -175,6 +195,15 @@ node scripts/skills-for.mjs worker --direction frontend --visible-file <会话�
 - `--task`：Overmind 给的包的标题，一句话
 - `--skill`：这次派工用到的 skill 名（没有就填 `code-team`）
 - `--plugin`：固定 `code-team`
+
+**新字段**（决策调用与派工都写）：`--invocation-id`（同一次调用共用一个）、`--agent`、
+`--status`（`started` / `succeeded` / `failed`）、`--call-mode`（`new` / `resume`）、
+`--error-code`、`--requested-model`、`--requested-effort`。没给的字段就不写这条事件
+（老事件保持逐字节不变）。参数表见 `references/codex-invocation.md`。
+
+**统计口径**：看板的 `totals.events` 数的是**调用次数**，不是事件条数——同一次调用
+（共享 `invocationId`）的多条事件只计一次，完成状态与用量取结果事件；
+**历史里没有 `invocationId` 的事件仍逐条计数**（沿用原读取逻辑）。原始事件表仍逐条展示。
 
 不记事件，控制台就统计不出「消耗集中在哪些项目、哪些任务」，也查不出该验收的没验收。
 
@@ -192,6 +221,8 @@ node scripts/skills-for.mjs worker --direction frontend --visible-file <会话�
   只有缺不可替代的数据访问才报告具体阻塞。
 - **没配可用的外部决策后端**：明示可以改用内置 Agent Team 或配另一个后端，
   **不要默默换掉 Overmind**——决策权归属是这套流程的地基。
+  外部决策后端有两种：`codex-cli`（本机 Codex）与 `external-command`（用户配置的本地命令），
+  配置、续问口径与一条完整示例见 `references/codex-invocation.md`。
 - **会话启动快照**：插件列表在会话启动时构建，装完要 `/plugins` → `Ctrl+R` → 重开会话。
 
 ## 九、验收证据链（Verifier 交什么，主会话怎么读）

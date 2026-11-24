@@ -220,7 +220,52 @@ if (!existsSync(SESSION_START)) {
   else fail("preflight-quiet", "ready 时不应有输出：" + JSON.stringify(readyPlain.stdout.slice(0, 200)));
 }
 
-// --- 5. 安装保全 ---
+// --- 5. localContext 键表（契约 1） ---
+// 造一个假的后端模块，录下 session-start 传进来的 localContext，验四个必需键。
+{
+  const fakeRoot = tempDir("ctxroot");
+  mkdirSync(join(fakeRoot, "scripts"), { recursive: true });
+  mkdirSync(join(fakeRoot, "config"), { recursive: true });
+  for (const f of ["session-start.mjs", "codex-bootstrap.mjs"]) {
+    cpSync(join(ROOT, "scripts", f), join(fakeRoot, "scripts", f), { recursive: true });
+  }
+  cpSync(join(ROOT, "config", "team.json"), join(fakeRoot, "config", "team.json"), { recursive: true });
+  const capture = join(fakeRoot, "captured.json");
+  writeFileSync(
+    join(fakeRoot, "scripts", "decision-backend.mjs"),
+    [
+      'import { writeFileSync } from "node:fs";',
+      'export function preflight(role, roleConfig, localContext) {',
+      '  writeFileSync(process.env.CT_CAPTURE, JSON.stringify(localContext));',
+      '  return { status: "ready", checks: [{ id: "fake", status: "ok", detail: "fake" }], nextStep: null };',
+      '}',
+      '',
+    ].join("\n"),
+    "utf8"
+  );
+  const ctxHome = fakeCodexHome("ctxhome");
+  const res = runNode([join(fakeRoot, "scripts", "session-start.mjs"), "--json"], isolatedEnv(ctxHome, { CT_CAPTURE: capture }));
+  let ctx = null;
+  try { ctx = JSON.parse(readFileSync(capture, "utf8")); } catch {}
+  if (!ctx) {
+    fail("localcontext-keys", "没录到传给后端的 localContext：" + (res.stderr || "").trim().split(/\r?\n/)[0]);
+  } else {
+    const required = ["config", "cwd", "eventsFile", "schemaFile"];
+    const missing = required.filter((k) => !(k in ctx));
+    if (missing.length) fail("localcontext-keys", "localContext 缺键：" + missing.join(", ") + "（契约 1 要求 config/cwd/eventsFile/schemaFile）");
+    else ok("localcontext-keys", required.join(", "));
+    if (ctx.eventsFile === join(fakeRoot, "config", "events.jsonl")) ok("localcontext-events-file", "config/events.jsonl");
+    else fail("localcontext-events-file", "eventsFile 不是插件根下的 config/events.jsonl：" + ctx.eventsFile);
+    if (ctx.schemaFile === join(fakeRoot, "config", "plan-schema.json")) ok("localcontext-schema-file", "config/plan-schema.json");
+    else fail("localcontext-schema-file", "schemaFile 不是插件根下的 config/plan-schema.json：" + ctx.schemaFile);
+    if (ctx.config && ctx.config.roles) ok("localcontext-config", "config 是完整 team.json");
+    else fail("localcontext-config", "config 不是完整的 team.json 对象");
+    if (typeof ctx.cwd === "string" && ctx.cwd) ok("localcontext-cwd", ctx.cwd);
+    else fail("localcontext-cwd", "cwd 不是字符串路径");
+  }
+}
+
+// --- 6. 安装保全 ---
 function fakeSource(tag) {
   // 造一个"开发机"的源目录：仓库的插件部分 + 本地运行时数据（旧版安装器会备份再还原它）。
   const dir = tempDir(tag);

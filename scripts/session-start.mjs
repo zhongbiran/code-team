@@ -14,6 +14,9 @@ import { codexReadiness } from "./codex-bootstrap.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CONFIG = join(ROOT, "config", "team.json");
+// 与 scripts/codex-team.mjs 同义：事件流与规划输出 schema 的真实位置。
+const EVENTS_FILE = join(ROOT, "config", "events.jsonl");
+const SCHEMA_FILE = join(ROOT, "config", "plan-schema.json");
 const BOOTSTRAP = join(ROOT, "scripts", "codex-bootstrap.mjs");
 const DECISION_ROLES = ["overmind", "coder"];
 
@@ -163,7 +166,8 @@ export async function runPreflight({ sessionId = null, cwd = null } = {}) {
       if (!nextStep) nextStep = { text: "把 " + role + " 角色补回 config/team.json（可照仓库默认配置补）", command: null };
       continue;
     }
-    const res = await backendPreflight(role, rc, { pluginRoot: ROOT, cwd: workdir, sessionId, config: cfg });
+    // 契约 1 的键表：config / cwd / eventsFile / schemaFile。三个入口共用同一份上下文，别处不要另写一份。
+    const res = await backendPreflight(role, rc, { config: cfg, cwd: workdir, eventsFile: EVENTS_FILE, schemaFile: SCHEMA_FILE });
     for (const c of res.checks) {
       checks.push(check(c.id.startsWith(role) ? c.id : role + "." + c.id, c.status, c.detail));
     }

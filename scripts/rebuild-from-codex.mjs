@@ -12,7 +12,9 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CODEX_SESSIONS = join(process.env.CODEX_HOME || join(homedir(), ".codex"), "sessions");
-const EVENTS = join(ROOT, "config", "events.jsonl");
+// 事件流路径可用 CODE_TEAM_EVENTS 指走别处：这个脚本是整份覆写，
+// 隔离运行时指错地方就会把真实事件流冲掉。
+const EVENTS = process.env.CODE_TEAM_EVENTS || join(ROOT, "config", "events.jsonl");
 
 const daysArg = process.argv.indexOf("--days");
 const DAYS = daysArg > 0 ? Number(process.argv[daysArg + 1]) : 7;

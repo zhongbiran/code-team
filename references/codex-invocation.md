@@ -131,6 +131,32 @@ $ my-decision-cli --prompt - --model my-house-model --effort high --json < promp
 
 事件里**不含** prompt、原始命令参数、完整 stdout/stderr；错误摘要先脱敏再截断。
 
+### 命令行记事件
+
+`scripts/record-event.mjs record` 能写上面这整条事件，参数用连字符风格（跟 `--elapsed-sec` 一致），
+落到事件里是契约的 camelCase 字段名：
+
+| 命令行参数 | 事件字段 | 取值 |
+|---|---|---|
+| `--kind` | `kind` | `call`（默认）/ `dispatch` / `dispatch-result` |
+| `--invocation-id` | `invocationId` | 与派工事件同一个 ID，看板靠它归组 |
+| `--agent` | `agent` | 执行角色标识；决策调用为 null |
+| `--status` | `status` | `started` / `succeeded` / `failed` |
+| `--call-mode` | `callMode` | `new` / `resume` |
+| `--error-code` | `errorCode` | 契约 1 的错误码 |
+| `--requested-model` | `requestedModel` | 本次请求的模型 |
+| `--requested-effort` | `requestedEffort` | 本次请求的档位 |
+
+没给的字段就不写这条事件（不会凭空多出一堆 null）。契约里的 camelCase 拼法（`--invocationId` 等）也收，
+两种拼法等价。
+
+事件流路径用 `CODE_TEAM_EVENTS` 覆盖，默认是 `config/events.jsonl`。测试与验收务必指到临时目录：
+
+```bash
+CODE_TEAM_EVENTS=/tmp/ct-events.jsonl node scripts/record-event.mjs record --kind dispatch --role worker --agent worker --invocation-id inv-1 --status started
+CODE_TEAM_EVENTS=/tmp/ct-events.jsonl node scripts/record-event.mjs list
+```
+
 ## 硬边界
 
 - 规划阶段 `--sandbox read-only`，Codex 不许改文件
