@@ -105,6 +105,18 @@ node scripts/codex-team.mjs plan --prompt-file <需求文件> --role overmind
 
 ### 2. 转发 Overmind 的结果
 
+**Overmind 会自己用 Codex 侧可用的 skill，不要限制它。** 实测确认：
+设计类任务它自动调用 `writing-plans`，诊断类任务自动调用 `systematic-debugging`，
+并说明这些 skill 如何影响了它的输出结构（拆包结构、假设与反证、验收标准）。
+
+Codex CLI 侧可用 skill 含 15 个 superpowers 的（brainstorming / writing-plans /
+systematic-debugging / executing-plans / dispatching-parallel-agents / test-driven-development /
+verification-before-completion / subagent-driven-development / using-git-worktrees 等），
+外加 Codex 自带的系统 skill。**这些是决策质量的一部分，别在契约里禁用它们。**
+
+反过来说：**主会话自己不要用这些 skill 去做决策**——主会话只有执行级模型，
+它的"方法论"不如 Overmind 用的那些可靠。
+
 Overmind 会返回：方案与理由、拆包、每包的 brief、哪几包需要 Coder。
 
 **原样转发，不要改写、不要替它补充。** 你的判断力不如它，改了反而变差。
