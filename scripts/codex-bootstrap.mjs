@@ -6,12 +6,44 @@
 // 不做这层同步，Codex 开的规划会话就看不到项目的验收命令与已知坑，等于让它瞎猜。
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const CODEX_HOME = process.env.CODEX_HOME || join(process.env.USERPROFILE, ".codex");
 
-const args = process.argv.slice(2);
+// Codex 侧的位置。首次会话预检（scripts/session-start.mjs）也要判断同一件事，
+// 所以导出这组只读函数，别处不再重复推导路径。
+export function codexHome(env = process.env) {
+  const home = env.USERPROFILE || env.HOME || "";
+  return env.CODEX_HOME || join(home, ".codex");
+}
+
+// Codex CLI 的 JS 入口（node_modules/@openai/codex/bin/codex.js）。
+export function codexEntryPath(env = process.env) {
+  return env.APPDATA ? join(env.APPDATA, "npm", "node_modules", "@openai", "codex", "bin", "codex.js") : null;
+}
+
+// 只读快照：Codex 侧现在有什么，缺什么。绝不写任何文件。
+export function codexReadiness(env = process.env) {
+  const home = codexHome(env);
+  const entry = codexEntryPath(env);
+  const agentsFile = join(home, "AGENTS.md");
+  const skillsDir = join(home, "skills");
+  let skills = [];
+  try {
+    skills = readdirSync(skillsDir).filter((d) => statSync(join(skillsDir, d)).isDirectory());
+  } catch {}
+  return {
+    codexHome: home,
+    codexEntry: entry,
+    codexEntryFound: Boolean(entry && existsSync(entry)),
+    agentsFile,
+    agentsFound: existsSync(agentsFile),
+    skills,
+  };
+}
+
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const args = isMain ? process.argv.slice(2) : [];
 const projectRoot = args[0] ? resolve(args[0]) : process.cwd();
 const mode = args[1] ?? "sync";
 
@@ -21,7 +53,7 @@ function readIfExists(p) {
 
 function copySkills() {
   const src = join(projectRoot, "skills");
-  const dst = join(CODEX_HOME, "skills");
+  const dst = join(codexHome(), "skills");
   if (!existsSync(src)) return { copied: [], skipped: "项目没有 skills/ 目录" };
   mkdirSync(dst, { recursive: true });
   const copied = [];
@@ -39,7 +71,7 @@ function copySkills() {
 }
 
 function writeCodexAgents() {
-  const p = join(CODEX_HOME, "AGENTS.md");
+  const p = join(codexHome(), "AGENTS.md");
   const existing = readIfExists(p);
   const marker = "<!-- code-team:start -->";
   const block = `${marker}
@@ -95,26 +127,28 @@ ${marker}
 }
 
 function report() {
+  const r = codexReadiness();
   console.log("Codex 侧环境检查");
-  console.log("  CODEX_HOME: " + CODEX_HOME);
-  console.log("  codex 可执行: " + (existsSync(join(process.env.APPDATA ?? "", "npm", "node_modules", "@openai", "codex", "bin", "codex.js")) ? "是" : "未找到"));
-  console.log("  全局 AGENTS.md: " + (existsSync(join(CODEX_HOME, "AGENTS.md")) ? "有" : "无"));
+  console.log("  CODEX_HOME: " + r.codexHome);
+  console.log("  codex 可执行: " + (r.codexEntryFound ? "是" : "未找到"));
+  console.log("  全局 AGENTS.md: " + (r.agentsFound ? "有" : "无"));
   console.log("  项目 AGENTS.md: " + (existsSync(join(projectRoot, "AGENTS.md")) ? "有" : "无"));
-  const skillsDir = join(CODEX_HOME, "skills");
-  const skills = existsSync(skillsDir) ? readdirSync(skillsDir).filter((d) => statSync(join(skillsDir, d)).isDirectory()) : [];
-  console.log("  Codex skill 目录: " + (skills.length ? skills.join(", ") : "无"));
+  console.log("  Codex skill 目录: " + (r.skills.length ? r.skills.join(", ") : "无"));
   console.log("  项目根: " + projectRoot);
 }
 
-if (mode === "report") {
-  report();
-} else if (mode === "sync") {
-  console.log(writeCodexAgents());
-  const r = copySkills();
-  const synced = r.skipped ?? (r.copied.length ? r.copied.join(", ") : "无");
-  console.log("skill 同步: " + synced);
-  report();
-} else {
-  console.log("用法: codex-bootstrap.mjs [项目根目录] [sync|report]");
-  process.exit(2);
+// 只在直接运行时执行 CLI；被 import 时（预检）只提供只读函数。
+if (isMain) {
+  if (mode === "report") {
+    report();
+  } else if (mode === "sync") {
+    console.log(writeCodexAgents());
+    const r = copySkills();
+    const synced = r.skipped ?? (r.copied.length ? r.copied.join(", ") : "无");
+    console.log("skill 同步: " + synced);
+    report();
+  } else {
+    console.log("用法: codex-bootstrap.mjs [项目根目录] [sync|report]");
+    process.exit(2);
+  }
 }

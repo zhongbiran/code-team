@@ -3,50 +3,23 @@
 // 存在的理由：本机 WebSocket 到 ChatGPT 不通，裸跑 codex exec 会先空转 5 次重连
 // （约 120 秒）才降级 HTTPS。这里用自定义 provider 直接走 HTTPS，并统一模型/档位/只读沙箱。
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { recordEvent, readEvents } from "./record-event.mjs";
+import { DEFAULT_EFFORT, DEFAULT_MODELS, invoke, sanitize, targetKey } from "./decision-backend.mjs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const CONFIG = join(ROOT, "config", "team.json");
-const EVENTS_FILE = join(ROOT, "config", "events.jsonl");
-const LEDGER = join(ROOT, "config", "usage-ledger.json");
-const SCHEMA = join(ROOT, "config", "plan-schema.json");
+// 这几个路径可以用环境变量指走别处：测试与验收必须用隔离目录，不许碰真实运行态。
+const CONFIG = process.env.CODE_TEAM_CONFIG || join(ROOT, "config", "team.json");
+const EVENTS_FILE = process.env.CODE_TEAM_EVENTS || join(ROOT, "config", "events.jsonl");
+const LEDGER = process.env.CODE_TEAM_LEDGER || join(ROOT, "config", "usage-ledger.json");
+const SCHEMA = process.env.CODE_TEAM_SCHEMA || join(ROOT, "config", "plan-schema.json");
 
 const ROLES = ["overmind", "coder"];
 
-// 定位 codex 的 JS 入口（node_modules/@openai/codex/bin/codex.js）。
-// 优先从 PATH 上的 codex.cmd 反推，找不到就退回默认的全局安装路径。
-function resolveCodexEntry() {
-  const candidates = [];
-  const npmRoot = process.env.APPDATA
-    ? join(process.env.APPDATA, "npm", "node_modules", "@openai", "codex", "bin", "codex.js")
-    : null;
-  if (npmRoot) candidates.push(npmRoot);
-  for (const c of candidates) {
-    if (existsSync(c)) return c;
-  }
-  console.error("找不到 codex 可执行入口（预期 node_modules/@openai/codex/bin/codex.js）");
-  process.exit(2);
-}
-
 function loadConfig() {
   return JSON.parse(readFileSync(CONFIG, "utf8"));
-}
-
-// 用自定义 provider 覆盖内置 openai（内置 provider 不允许被覆盖，只能另起一个 id）。
-// supports_websockets=false 是关键：它让 codex 跳过 WebSocket 直连，不再空转 120 秒。
-function providerArgs(cfg) {
-  const p = cfg.provider;
-  return [
-    "-c", `model_provider="${p.id}"`,
-    "-c", `model_providers.${p.id}.name="${p.name}"`,
-    "-c", `model_providers.${p.id}.base_url="${p.base_url}"`,
-    "-c", `model_providers.${p.id}.wire_api="${p.wire_api}"`,
-    "-c", `model_providers.${p.id}.requires_openai_auth=true`,
-    "-c", `model_providers.${p.id}.supports_websockets=false`,
-  ];
 }
 
 function parseArgs(argv) {
@@ -90,7 +63,7 @@ function appendUsage(entry) {
 function showBudget() {
   const now = Date.now();
   const windowMs = 5 * 60 * 60 * 1000;
-  const all = readEvents().filter((e) => e.kind === "codex-call" || e.kind === "call");
+  const all = readEvents(EVENTS_FILE).filter((e) => e.kind === "codex-call" || e.kind === "call");
   const recent = all.filter((e) => now - new Date(e.at).getTime() < windowMs);
   const utc = new Date(now);
   const today = all.filter((e) => {
@@ -193,8 +166,10 @@ function runPlan(args) {
     console.error(`team.json 里没有角色 "${role}" 的配置`);
     process.exit(2);
   }
-  const model = args.model ?? roleCfg.model;
-  const effort = args.effort ?? roleCfg.effort;
+  // 调用方式由角色的 backend 决定：codex-cli 或用户配置的本地外部命令。
+  const backend = roleCfg.backend ?? "codex-cli";
+  const model = args.model ?? roleCfg.model ?? (backend === "codex-cli" ? DEFAULT_MODELS[role] ?? null : null);
+  const effort = args.effort ?? roleCfg.effort ?? (backend === "codex-cli" ? DEFAULT_EFFORT : null);
   let prompt = readFileSync(promptPath, "utf8");
   // 契约是流程骨架（决策/拆包/brief/是否要 Coder），不受 --plain 影响。
   // --plain 只控制"要不要结构化 JSON 输出"，不控制"要不要给下游用的骨架"。
@@ -211,78 +186,87 @@ function runPlan(args) {
     process.exit(0);
   }
 
-  // codex 的全局选项必须排在子命令之前，exec 的选项排在其后。
-  const globalArgs = [...providerArgs(cfg), "-m", model, "-c", `model_reasoning_effort="${effort}"`];
-  // exec 与 exec resume 的选项集不同：
-  // resume 不接受 --sandbox / -C（沿用原线程设置），但接受 --skip-git-repo-check / --output-schema。
-  const execArgs = ["--skip-git-repo-check", "--json"];
-  if (!args.resume) {
-    execArgs.unshift("--sandbox", "read-only");
-    if (args.cwd) execArgs.push("-C", String(args.cwd));
-  }
-  if (!args.plain && existsSync(SCHEMA)) execArgs.push("--output-schema", SCHEMA);
+  const localContext = {
+    config: cfg,
+    cwd: args.cwd ? resolve(String(args.cwd)) : process.cwd(),
+    eventsFile: EVENTS_FILE,
+    schemaFile: SCHEMA,
+    codexEntry: process.env.CODE_TEAM_CODEX_ENTRY || null,
+    modelsFile: process.env.CODE_TEAM_MODELS || null,
+  };
+  const invocationId = randomUUID();
+  // 续问句柄：线程 ID 由用户给，后端自己核对它是不是本地确认过的线程。
+  const continuation = args.resume
+    ? {
+        backend,
+        role,
+        threadId: String(args.resume),
+        targetKey: targetKey(role, { ...roleCfg, model, effort }, localContext),
+      }
+    : null;
 
-  const cmd = [];
-  if (args.resume) cmd.push("exec", "resume", ...globalArgs, ...execArgs, String(args.resume));
-  else cmd.push("exec", ...globalArgs, ...execArgs);
+  const result = invoke(
+    {
+      invocationId,
+      role,
+      roleConfig: { ...roleCfg, model, effort },
+      prompt,
+      cwd: localContext.cwd,
+      continuation,
+      project: args.project ?? null,
+      session: args.session ?? null,
+      task: args.task ?? null,
+      plain: Boolean(args.plain),
+    },
+    localContext
+  );
 
-  const started = Date.now();
-  // 直接跑 codex 的 JS 入口，不经 shell：避开 Windows .cmd 包装，也就没有 shell 注入面和弃用警告。
-  const codexJs = resolveCodexEntry();
-  const res = spawnSync(process.execPath, [codexJs, ...cmd], {
-    input: prompt,
-    encoding: "utf8",
-    maxBuffer: 64 * 1024 * 1024,
-  });
-  const elapsed = ((Date.now() - started) / 1000).toFixed(1);
-
-  const stdout = res.stdout ?? "";
-  const stderr = res.stderr ?? "";
-  let usage = null;
-  let threadId = null;
-  let lastMessage = "";
-  for (const line of stdout.split(/\r?\n/)) {
-    if (!line.startsWith("{")) continue;
-    let evt;
-    try { evt = JSON.parse(line); } catch { continue; }
-    if (evt.type === "thread.started") threadId = evt.thread_id;
-    if (evt.type === "turn.completed") usage = evt.usage;
-    if (evt.type === "item.completed" && evt.item?.type === "agent_message") lastMessage = evt.item.text;
-  }
-
-  if (res.error) {
-    console.error("codex 调用失败: " + res.error.message);
-    process.exit(1);
-  }
+  // 一次尝试只写一条事件。写两条的话看板会把一次调用算成两次。
+  const threadId = result.continuation?.threadId ?? null;
   const event = {
     at: new Date().toISOString(),
-    kind: "codex-call",
+    kind: "call",
     role,
-    backend: "codex-cli",
-    model,
-    effort,
+    backend: result.backend,
+    // 模型与档位优先填运行端报告的实际值；外部命令没报告就填 null，
+    // 请求值另记在 requestedModel/requestedEffort。
+    model: result.reportedModel ?? (result.backend === "codex-cli" ? model : null),
+    effort: result.reportedEffort ?? (result.backend === "codex-cli" ? effort : null),
     project: args.project ?? null,
     session: args.session ?? threadId ?? null,
     task: args.task ?? null,
     skill: args.skill ?? "code-team",
     plugin: args.plugin ?? "code-team",
-    elapsedSec: Number(elapsed),
-    usage,
-    ok: res.status === 0,
+    elapsedSec: result.elapsedSec ?? null,
+    usage: result.usage ?? null,
+    ok: result.ok,
     note: threadId ? "thread:" + threadId : null,
+    invocationId,
+    agent: null,
+    requestedModel: model ?? null,
+    requestedEffort: effort ?? null,
+    callMode: result.callMode ?? null,
+    status: result.ok ? "succeeded" : "failed",
+    errorCode: result.error?.code ?? null,
+    errorMessage: result.error ? sanitize(result.error.message) : null,
+    threadId,
+    continuation: result.continuation ?? null,
   };
-  if (usage) appendUsage({ at: event.at, role, model, effort, elapsedSec: event.elapsedSec, threadId, usage });
-  // 通用事件流：后端无关，换后端统计不用改。
-  recordEvent(event);
+  if (event.usage) {
+    appendUsage({ at: event.at, role, model: event.model, effort: event.effort, elapsedSec: event.elapsedSec, threadId, usage: event.usage });
+  }
+  recordEvent(event, EVENTS_FILE);
 
-  console.log(lastMessage || stdout || "(无输出)");
-  console.error("\n--- codex 调用元信息 ---");
-  console.error("role=" + role + " model=" + model + " effort=" + effort + " elapsed=" + elapsed + "s");
+  console.log(result.text || "(无输出)");
+  console.error("\n--- 决策调用元信息 ---");
+  console.error("role=" + role + " backend=" + result.backend + " model=" + event.model + " effort=" + event.effort + " elapsed=" + event.elapsedSec + "s");
   if (threadId) console.error("thread_id=" + threadId);
-  if (usage) console.error("usage=" + JSON.stringify(usage));
-  if (res.status !== 0) {
-    console.error(stderr.slice(0, 2000));
-    process.exit(res.status ?? 1);
+  if (result.usage) console.error("usage=" + JSON.stringify(result.usage));
+  if (!result.ok) {
+    console.error("调用失败: " + result.error.code + " " + result.error.message);
+    // 配置与用法类错误给 2（跟其它参数错误一致），运行失败沿用后端的退出码。
+    const usageErrors = ["INVALID_CONFIG", "PREFLIGHT_BLOCKED", "RESUME_UNSUPPORTED", "RESUME_MISMATCH"];
+    process.exit(usageErrors.includes(result.error.code) ? 2 : result.exitCode ?? 1);
   }
 }
 

@@ -64,6 +64,29 @@
       "note": "独立验收，干净 context，只做一次。"
     }
   },
+  "routing": {
+    "directions": [
+      {
+        "id": "frontend",
+        "skills": [
+          "frontend-design:frontend-design",
+          "senior-fullstack-developer:frontend-dev"
+        ]
+      },
+      {
+        "id": "fullstack",
+        "skills": [
+          "senior-fullstack-developer:fullstack-dev"
+        ]
+      },
+      {
+        "id": "notion-spec",
+        "skills": [
+          "notion:notion-spec-to-implementation"
+        ]
+      }
+    ]
+  },
   "provider": {
     "id": "codexchatgpt",
     "name": "ChatGPT (no-websockets)",

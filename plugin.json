@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "code-team",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "多 Agent 协作工作流：决策权在 Overmind（Codex CLI），代码方向交 Coder，执行由 worker/explore/verifier 并行完成。含额度守卫与可替换后端配置。",
   "author": {
     "name": "Zhong Biran",

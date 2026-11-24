@@ -18,6 +18,30 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const LEDGER = join(ROOT, "config", "lessons.json");
 const CHECKS_DIR = join(ROOT, "checks");
 const PROMOTE_AT = 2;   // 同一条纠正出现几次就该升级成检查
+const DEPTH_ENV = "CODE_TEAM_CHECK_DEPTH";   // 递归调用守卫
+
+// 随包发布的检查：checks/ 下的每个 .mjs 都是必跑项。
+// 台账里已升级的检查也合并进来，重复的只跑一次。
+function bundledChecks() {
+  try {
+    return readdirSync(CHECKS_DIR).filter((n) => n.endsWith(".mjs")).sort();
+  } catch {
+    return [];
+  }
+}
+
+function checkPlan(ledger) {
+  const plan = [];
+  const seen = new Set();
+  const add = (name, lesson) => {
+    if (seen.has(name)) return;
+    seen.add(name);
+    plan.push({ name, lesson: lesson || null });
+  };
+  for (const n of bundledChecks()) add(n);
+  for (const l of ledger.lessons.filter((x) => x.promoted)) add(l.promoted, l);
+  return plan;
+}
 
 function loadLedger() {
   if (!existsSync(LEDGER)) return { lessons: [] };
@@ -116,28 +140,43 @@ function cmdPromote(args) {
   console.log(`${id} 已升级为检查: checks/${checkName}`);
 }
 
-function cmdCheck() {
+function cmdListChecks() {
   const ledger = loadLedger();
-  const promoted = ledger.lessons.filter((l) => l.promoted);
-  if (!promoted.length) {
-    console.log("还没有已升级的检查。");
-    return;
+  for (const item of checkPlan(ledger)) console.log(item.name);
+}
+
+function cmdCheck() {
+  // 递归守卫：检查脚本再调总入口就是无限递归，直接拒掉。
+  if (process.env[DEPTH_ENV]) {
+    console.error(`检测到检查入口的递归调用（${DEPTH_ENV} 已设置）——检查脚本不许再跑总入口。`);
+    process.exit(2);
+  }
+  const ledger = loadLedger();
+  const plan = checkPlan(ledger);
+  if (!plan.length) {
+    console.error("checks/ 下没有检查脚本 —— 发布检查没有把关项。");
+    process.exit(1);
   }
   let failed = 0;
-  for (const l of promoted) {
-    const file = join(CHECKS_DIR, l.promoted);
+  for (const item of plan) {
+    const file = join(CHECKS_DIR, item.name);
+    const tag = item.lesson ? item.lesson.id : item.name;
     if (!existsSync(file)) {
-      console.log(`FAIL ${l.id}  检查脚本缺失: ${l.promoted}`);
+      console.log(`FAIL ${tag}  检查脚本缺失: ${item.name}`);
       failed++;
       continue;
     }
-    const res = spawnSync(process.execPath, [file], { encoding: "utf8" });
+    const res = spawnSync(process.execPath, [file], {
+      encoding: "utf8",
+      cwd: ROOT,
+      env: { ...process.env, [DEPTH_ENV]: "1" },
+    });
     const out = (res.stdout || "") + (res.stderr || "");
     if (res.status === 0) {
-      console.log(`PASS ${l.id}  ${l.promoted}`);
+      console.log(`PASS ${tag}  ${item.name}`);
     } else {
       failed++;
-      console.log(`FAIL ${l.id}  ${l.promoted}`);
+      console.log(`FAIL ${tag}  ${item.name}`);
       if (out.trim()) console.log(out.trim().split("\n").map((line) => "      " + line).join("\n"));
     }
   }
@@ -161,11 +200,13 @@ switch (args._[0]) {
   case "list": cmdList(); break;
   case "promote": cmdPromote(args); break;
   case "check": cmdCheck(); break;
+  case "list-checks": cmdListChecks(); break;
   default:
     console.log("用法:");
     console.log('  lessons.mjs record "<纠正内容>"');
     console.log("  lessons.mjs list");
     console.log('  lessons.mjs promote <ID> "<检查脚本名>" "<描述>"');
     console.log("  lessons.mjs check");
+    console.log("  lessons.mjs list-checks");
     process.exit(args._[0] ? 2 : 0);
 }

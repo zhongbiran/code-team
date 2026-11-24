@@ -34,9 +34,23 @@ function parseArgs(argv) {
   return out;
 }
 
-export function recordEvent(event) {
-  mkdirSync(dirname(LEDGER), { recursive: true });
-  const line = JSON.stringify({
+// 决策调用新增的字段。没给就不写，老事件保持逐字节不变。
+const EXTRA_FIELDS = [
+  "invocationId",
+  "agent",
+  "requestedModel",
+  "requestedEffort",
+  "callMode",
+  "status",
+  "errorCode",
+  "errorMessage",
+  "threadId",
+  "continuation",
+];
+
+export function recordEvent(event, file = LEDGER) {
+  mkdirSync(dirname(file), { recursive: true });
+  const base = {
     at: event.at ?? new Date().toISOString(),
     kind: event.kind ?? "call",
     role: event.role ?? null,
@@ -52,13 +66,17 @@ export function recordEvent(event) {
     usage: event.usage ?? null,
     ok: event.ok ?? true,
     note: event.note ?? null,
-  }) + "\n";
-  writeFileSync(LEDGER, line, { encoding: "utf8", flag: "a" });
+  };
+  for (const key of EXTRA_FIELDS) {
+    if (event[key] !== undefined) base[key] = event[key];
+  }
+  const line = JSON.stringify(base) + "\n";
+  writeFileSync(file, line, { encoding: "utf8", flag: "a" });
 }
 
-export function readEvents() {
-  if (!existsSync(LEDGER)) return [];
-  return readFileSync(LEDGER, "utf8")
+export function readEvents(file = LEDGER) {
+  if (!existsSync(file)) return [];
+  return readFileSync(file, "utf8")
     .split(/\r?\n/)
     .filter(Boolean)
     .map((line) => {

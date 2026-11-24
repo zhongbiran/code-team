@@ -5,6 +5,11 @@
 // 这种失败是隐形的。配置里加新 skill 时跑一次这个检查。
 //
 // 侧由角色的 backend 决定：codex-cli -> Codex 侧；mcode-agent -> MCode 侧。
+//
+// 跨机器降级口径（与工作流的「缺插件就降级」一致）：
+//   插件没装      -> WARN，这台机器按缺插件降级，不是发布阻塞
+//   这一侧没铺    -> WARN，这台机器没用这一侧
+//   装了却找不到  -> FAIL，名字写错了，方法论永远不会被加载
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -41,6 +46,24 @@ function findPluginSkillFile(roots, plugin, name) {
   return null;
 }
 
+// 这个插件在本机装没装。装了却找不到 skill = 名字写错（隐形失败，要报）。
+// 没装 = 该机器缺插件，走降级（角色基础能力仍能干活），不该拦住发布。
+function pluginInstalled(roots, plugin) {
+  for (const root of roots) {
+    if (!existsSync(root)) continue;
+    for (const p of safeReaddir(root)) {
+      if (p === plugin) return true;
+      for (const q of safeReaddir(join(root, p))) {
+        if (q === plugin) return true;
+        for (const v of safeReaddir(join(root, p, q))) {
+          if (v === plugin) return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 function safeReaddir(dir) {
   try {
     return readdirSync(dir).filter((n) => statSync(join(dir, n)).isDirectory());
@@ -54,6 +77,8 @@ const CODEX_ROOTS = [
   join(HOME, ".codex", "plugins"),
 ];
 const MCODE_ROOTS = [join(HOME, ".minimax", "plugins")];
+// 裸名 skill 就躺在这两个目录里（两侧都查）。
+const BARE_ROOTS = [join(HOME, ".codex", "skills"), join(HOME, ".agents", "skills")];
 
 let problems = 0;
 let checked = 0;
@@ -86,7 +111,7 @@ for (const [role, rc] of Object.entries(cfg.roles ?? {})) {
           }
         }
       } else {
-        for (const p of [join(HOME, ".codex", "skills"), join(HOME, ".agents", "skills")]) {
+        for (const p of BARE_ROOTS) {
           const cand = join(p, name, "SKILL.md");
           if (existsSync(cand)) { hit = cand; break; }
         }
@@ -101,7 +126,7 @@ for (const [role, rc] of Object.entries(cfg.roles ?? {})) {
           }
         }
       } else {
-        for (const p of [join(HOME, ".agents", "skills"), join(HOME, ".codex", "skills")]) {
+        for (const p of BARE_ROOTS) {
           const cand = join(p, name, "SKILL.md");
           if (existsSync(cand)) { hit = cand; break; }
         }
@@ -109,9 +134,13 @@ for (const [role, rc] of Object.entries(cfg.roles ?? {})) {
     }
     if (hit) {
       console.log("OK   " + role.padEnd(10) + raw + "  ->  " + hit);
+    } else if (plugin && !pluginInstalled(side === "Codex" ? CODEX_ROOTS : MCODE_ROOTS, plugin)) {
+      console.log("WARN " + role.padEnd(10) + raw + "  ->  本机没装 " + plugin + " 插件（按缺插件降级，不算发布阻塞）");
+    } else if (!plugin && !BARE_ROOTS.some((p) => existsSync(p))) {
+      console.log("WARN " + role.padEnd(10) + raw + "  ->  本机没铺这一侧的 skill 目录（这台机器没用 " + side + " 侧）");
     } else {
       problems++;
-      console.log("FAIL " + role.padEnd(10) + raw + "  ->  " + side + " 侧找不到（插件未装？名字写错？）");
+      console.log("FAIL " + role.padEnd(10) + raw + "  ->  " + side + " 侧找不到（插件装了但名字写错？）");
     }
   }
 }
@@ -119,7 +148,8 @@ for (const [role, rc] of Object.entries(cfg.roles ?? {})) {
 // Codex 侧的可见 skill 列表有上下文预算上限（实测）：
 // 平铺 19 个描述较长的 skill，可见数从 53 掉到 34，按字母序排在后面的整组消失
 // （superpowers: 全组、work-pets: 全部被挤掉）。
-// 这里用"平铺数量"当红线——数值是经验值，宁可保守。
+// 这里用"平铺数量"当红线——数值是经验值，宁可保守。这是本机配置问题，不是本仓缺陷，
+// 所以只警告，不拦发布。
 const codexFlat = join(HOME, ".codex", "skills");
 let flatCount = 0;
 try {
@@ -128,8 +158,7 @@ try {
   ).length;
 } catch {}
 if (flatCount > 8) {
-  problems++;
-  console.log("FAIL Codex 侧平铺 skill " + flatCount + " 个（>8）：列表有预算上限，多的会把后面的整组挤掉");
+  console.log("WARN Codex 侧平铺 skill " + flatCount + " 个（>8）：列表有预算上限，多的会把后面的整组挤掉");
 } else {
   console.log("OK   Codex 侧平铺 skill " + flatCount + " 个（上限 8）");
 }

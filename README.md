@@ -16,6 +16,23 @@
 所以决策全部交给 Overmind：值不值得规划、需求怎么理解、方案取舍、怎么拆包、每包的 brief。
 主会话只做四件事：转交需求、转发结果、追加用户问题、汇报。
 
+## 一个入口 + 一道把关
+
+**入口只有一个**：主 skill `skills/code-team/SKILL.md`。它按 Notion 插件那套写法组织——
+frontmatter 带 `metadata.short-description`、编号 quick start 每步点名真实入口、
+细节外置到 `references/usage.md`、工具不可用即降级不重试。
+
+**把关只有一个**：`node scripts/lessons.mjs check`。它把「随包发布的必跑检查」
+（`checks/` 下的每个 `.mjs`）和「台账里已升级的检查」合并去重后一起跑：
+
+- **空台账也照跑随包检查**——台账为空不是「没有检查可跑」，是「随包检查还没被跑到」
+- 台账引用缺失就报错，不静默跳过
+- 同名的检查只跑一次
+- 检查脚本不许再调总入口（总入口用 `CODE_TEAM_CHECK_DEPTH` 挡住递归）
+
+原生模式交接（宿主命令面板里的 `/plan`、`/goal`、`/compact`、`/sidechat`）
+只在**当前会话实际暴露**该入口时用，没暴露就用等价手段替代并在汇报里说明。
+
 ## 仓库结构
 
 | 路径 | 是什么 |
@@ -88,8 +105,9 @@ node scripts/codex-team.mjs plan --prompt-file 追加.md --role overmind --resum
 # 看用量
 node scripts/codex-team.mjs budget
 
-# 跑自动检查
+# 跑自动检查（发布把关总入口：随包检查 + 台账检查，合并去重）
 node scripts/lessons.mjs check
+node scripts/lessons.mjs list-checks   # 只列将要跑的检查，不执行
 
 # 从 Codex 会话记录回填事件流（事件流丢了或想统计历史时）
 node scripts/rebuild-from-codex.mjs --days 7
@@ -124,6 +142,8 @@ node scripts/lessons.mjs check                  # 跑所有检查
 落点优先级：`checks/` 脚本 > 测试 > hook > 写进 SKILL.md。
 最后一项是下策——skill 里的规则"读了有时会被忽略"，一个失败的检查不会。
 
+升级后的检查会被 `node scripts/lessons.mjs check` 自动纳入总入口（与随包检查合并去重）。
+
 每条检查必须**先在旧现场验证它会失败**，再确认当前代码能过。
 
 ## 推到 GitHub
@@ -150,6 +170,7 @@ https://github.com/zhongbiran/code-team-board
 
 | 文档 | 内容 |
 |---|---|
+| [references/usage.md](references/usage.md) | 主 skill 的细节外置：角色与 skill 名单、模式交接细则、事件字段、命令清单 |
 | [docs/架构.md](docs/架构.md) | 决策权归属表、后端可插拔、Overmind 契约 |
 | [docs/使用手册.md](docs/使用手册.md) | 怎么调用、换模型、典型节奏 |
 | [docs/mcode-最佳使用方案.md](docs/mcode-最佳使用方案.md) | 从官方博客提炼的使用原则 |

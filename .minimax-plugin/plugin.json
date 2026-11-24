@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "name": "code-team",
   "displayName": "Code Team",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "多 Agent 协作工作流：主会话编排，Codex CLI 担任 Overmind（总策划）与 Coder（编码方向规划），并用 worker/explore/verifier 三个子代理并行落地。带额度守卫，避免规划期空烧 token。",
   "author": "钟必然",
   "icon": "icon.png",
@@ -16,6 +16,9 @@
   "mcpServers": [],
   "skills": [
     "skills/code-team/SKILL.md"
+  ],
+  "hooks": [
+    "hooks/hooks.json"
   ],
   "agents": []
 }
