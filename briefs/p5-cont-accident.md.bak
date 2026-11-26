@@ -1,0 +1,5 @@
+# 任务包 P5 续派
+## 文件归属（只改这些）
+- `Src/02-Application/RC.DustFall.Application/Domain/Helper/SimulationEngine.cs`
+## 验收
+`pwsh -File Scripts\verify.ps1 -ChecksOnly` 通过

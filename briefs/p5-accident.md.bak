@@ -1,0 +1,3 @@
+# 任务包 P5
+## Done
+`pwsh -File Scripts\verify.ps1 -ChecksOnly` → 退出 0 末行"全部通过"。

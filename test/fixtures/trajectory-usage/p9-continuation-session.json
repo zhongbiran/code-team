@@ -1,0 +1,2211 @@
+{
+ "_note": "去标识真实记录：来源 mcode-trajectory-studio 的 trajectory_get(summary)。msgId/turnId 已替换为序号，原值仅用于同一条记录内部自洽。",
+ "title": "P9 续派子会话（去标识）",
+ "records": [
+  {
+   "msgId": "m-0001",
+   "turnId": "turn-1",
+   "role": "user",
+   "createdAtMs": 1795536127918,
+   "toolCallCount": 0,
+   "usage": null
+  },
+  {
+   "msgId": "m-0002",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536135138,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 27749,
+    "outputTokens": 101,
+    "cacheReadTokens": 128,
+    "totalTokens": 27978
+   }
+  },
+  {
+   "msgId": "m-0003",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536137543,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2044,
+    "outputTokens": 104,
+    "cacheReadTokens": 27877,
+    "totalTokens": 30025
+   }
+  },
+  {
+   "msgId": "m-0004",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536142156,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 3601,
+    "outputTokens": 213,
+    "cacheReadTokens": 29921,
+    "totalTokens": 33735
+   }
+  },
+  {
+   "msgId": "m-0005",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536145519,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 1244,
+    "outputTokens": 347,
+    "cacheReadTokens": 33522,
+    "totalTokens": 35113
+   }
+  },
+  {
+   "msgId": "m-0006",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536148457,
+   "toolCallCount": 6,
+   "usage": {
+    "inputTokens": 2561,
+    "outputTokens": 300,
+    "cacheReadTokens": 34766,
+    "totalTokens": 37627
+   }
+  },
+  {
+   "msgId": "m-0007",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536151487,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 3168,
+    "outputTokens": 194,
+    "cacheReadTokens": 37327,
+    "totalTokens": 40689
+   }
+  },
+  {
+   "msgId": "m-0008",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536153756,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 1278,
+    "outputTokens": 186,
+    "cacheReadTokens": 40495,
+    "totalTokens": 41959
+   }
+  },
+  {
+   "msgId": "m-0009",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536158064,
+   "toolCallCount": 5,
+   "usage": {
+    "inputTokens": 4918,
+    "outputTokens": 337,
+    "cacheReadTokens": 41773,
+    "totalTokens": 47028
+   }
+  },
+  {
+   "msgId": "m-0010",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536162348,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 17085,
+    "outputTokens": 443,
+    "cacheReadTokens": 46691,
+    "totalTokens": 64219
+   }
+  },
+  {
+   "msgId": "m-0011",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536176558,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 5175,
+    "outputTokens": 1791,
+    "cacheReadTokens": 63776,
+    "totalTokens": 70742
+   }
+  },
+  {
+   "msgId": "m-0012",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536180642,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 7294,
+    "outputTokens": 387,
+    "cacheReadTokens": 68951,
+    "totalTokens": 76632
+   }
+  },
+  {
+   "msgId": "m-0013",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536182959,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 676,
+    "outputTokens": 152,
+    "cacheReadTokens": 76245,
+    "totalTokens": 77073
+   }
+  },
+  {
+   "msgId": "m-0014",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536209949,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 6171,
+    "outputTokens": 3227,
+    "cacheReadTokens": 76921,
+    "totalTokens": 86319
+   }
+  },
+  {
+   "msgId": "m-0015",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536214521,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 7906,
+    "outputTokens": 314,
+    "cacheReadTokens": 83092,
+    "totalTokens": 91312
+   }
+  },
+  {
+   "msgId": "m-0016",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536218095,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 3202,
+    "outputTokens": 281,
+    "cacheReadTokens": 90998,
+    "totalTokens": 94481
+   }
+  },
+  {
+   "msgId": "m-0017",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536278803,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 6505,
+    "outputTokens": 7036,
+    "cacheReadTokens": 94200,
+    "totalTokens": 107741
+   }
+  },
+  {
+   "msgId": "m-0018",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536290850,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 9656,
+    "outputTokens": 524,
+    "cacheReadTokens": 100705,
+    "totalTokens": 110885
+   }
+  },
+  {
+   "msgId": "m-0019",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536302692,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 654,
+    "outputTokens": 504,
+    "cacheReadTokens": 110361,
+    "totalTokens": 111519
+   }
+  },
+  {
+   "msgId": "m-0020",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536316401,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 635,
+    "outputTokens": 707,
+    "cacheReadTokens": 111015,
+    "totalTokens": 112357
+   }
+  },
+  {
+   "msgId": "m-0021",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536322599,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 771,
+    "outputTokens": 337,
+    "cacheReadTokens": 111650,
+    "totalTokens": 112758
+   }
+  },
+  {
+   "msgId": "m-0022",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536329032,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 5053,
+    "outputTokens": 617,
+    "cacheReadTokens": 112421,
+    "totalTokens": 118091
+   }
+  },
+  {
+   "msgId": "m-0023",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536333340,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1382,
+    "outputTokens": 230,
+    "cacheReadTokens": 117474,
+    "totalTokens": 119086
+   }
+  },
+  {
+   "msgId": "m-0024",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536360366,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1066,
+    "outputTokens": 806,
+    "cacheReadTokens": 118856,
+    "totalTokens": 120728
+   }
+  },
+  {
+   "msgId": "m-0025",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536375197,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 3136,
+    "outputTokens": 340,
+    "cacheReadTokens": 119922,
+    "totalTokens": 123398
+   }
+  },
+  {
+   "msgId": "m-0026",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536387945,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 3250,
+    "outputTokens": 1013,
+    "cacheReadTokens": 123058,
+    "totalTokens": 127321
+   }
+  },
+  {
+   "msgId": "m-0027",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536400842,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1756,
+    "outputTokens": 907,
+    "cacheReadTokens": 126308,
+    "totalTokens": 128971
+   }
+  },
+  {
+   "msgId": "m-0028",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536407024,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1075,
+    "outputTokens": 242,
+    "cacheReadTokens": 128064,
+    "totalTokens": 129381
+   }
+  },
+  {
+   "msgId": "m-0029",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536414811,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 267,
+    "outputTokens": 308,
+    "cacheReadTokens": 129139,
+    "totalTokens": 129714
+   }
+  },
+  {
+   "msgId": "m-0030",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536424999,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 853,
+    "outputTokens": 780,
+    "cacheReadTokens": 129406,
+    "totalTokens": 131039
+   }
+  },
+  {
+   "msgId": "m-0031",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536430059,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1839,
+    "outputTokens": 428,
+    "cacheReadTokens": 130259,
+    "totalTokens": 132526
+   }
+  },
+  {
+   "msgId": "m-0032",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536434067,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 567,
+    "outputTokens": 174,
+    "cacheReadTokens": 132098,
+    "totalTokens": 132839
+   }
+  },
+  {
+   "msgId": "m-0033",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536439803,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 26054,
+    "outputTokens": 262,
+    "cacheReadTokens": 132665,
+    "totalTokens": 158981
+   }
+  },
+  {
+   "msgId": "m-0034",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536449044,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 1750,
+    "outputTokens": 834,
+    "cacheReadTokens": 158719,
+    "totalTokens": 161303
+   }
+  },
+  {
+   "msgId": "m-0035",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536458798,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 3120,
+    "outputTokens": 690,
+    "cacheReadTokens": 160469,
+    "totalTokens": 164279
+   }
+  },
+  {
+   "msgId": "m-0036",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536464469,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2482,
+    "outputTokens": 262,
+    "cacheReadTokens": 163589,
+    "totalTokens": 166333
+   }
+  },
+  {
+   "msgId": "m-0037",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536473737,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1579,
+    "outputTokens": 803,
+    "cacheReadTokens": 166071,
+    "totalTokens": 168453
+   }
+  },
+  {
+   "msgId": "m-0038",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536506338,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 2010,
+    "outputTokens": 3091,
+    "cacheReadTokens": 167650,
+    "totalTokens": 172751
+   }
+  },
+  {
+   "msgId": "m-0039",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536528883,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 4964,
+    "outputTokens": 2038,
+    "cacheReadTokens": 169660,
+    "totalTokens": 176662
+   }
+  },
+  {
+   "msgId": "m-0040",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536545978,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 2222,
+    "outputTokens": 1454,
+    "cacheReadTokens": 174624,
+    "totalTokens": 178300
+   }
+  },
+  {
+   "msgId": "m-0041",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536550009,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1507,
+    "outputTokens": 138,
+    "cacheReadTokens": 176846,
+    "totalTokens": 178491
+   }
+  },
+  {
+   "msgId": "m-0042",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536556254,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1625,
+    "outputTokens": 348,
+    "cacheReadTokens": 178353,
+    "totalTokens": 180326
+   }
+  },
+  {
+   "msgId": "m-0043",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536575519,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 961,
+    "outputTokens": 1062,
+    "cacheReadTokens": 179978,
+    "totalTokens": 182001
+   }
+  },
+  {
+   "msgId": "m-0044",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536599042,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1178,
+    "outputTokens": 2315,
+    "cacheReadTokens": 180939,
+    "totalTokens": 184432
+   }
+  },
+  {
+   "msgId": "m-0045",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536608761,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2378,
+    "outputTokens": 340,
+    "cacheReadTokens": 182117,
+    "totalTokens": 184835
+   }
+  },
+  {
+   "msgId": "m-0046",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536614596,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 395,
+    "outputTokens": 163,
+    "cacheReadTokens": 184495,
+    "totalTokens": 185053
+   }
+  },
+  {
+   "msgId": "m-0047",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536620039,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1116,
+    "outputTokens": 212,
+    "cacheReadTokens": 184890,
+    "totalTokens": 186218
+   }
+  },
+  {
+   "msgId": "m-0048",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536647722,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 371,
+    "outputTokens": 3542,
+    "cacheReadTokens": 186006,
+    "totalTokens": 189919
+   }
+  },
+  {
+   "msgId": "m-0049",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536655269,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 3655,
+    "outputTokens": 363,
+    "cacheReadTokens": 186377,
+    "totalTokens": 190395
+   }
+  },
+  {
+   "msgId": "m-0050",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536664603,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 653,
+    "outputTokens": 162,
+    "cacheReadTokens": 190032,
+    "totalTokens": 190847
+   }
+  },
+  {
+   "msgId": "m-0051",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536671650,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 227,
+    "outputTokens": 535,
+    "cacheReadTokens": 190685,
+    "totalTokens": 191447
+   }
+  },
+  {
+   "msgId": "m-0052",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536675324,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 621,
+    "outputTokens": 97,
+    "cacheReadTokens": 190912,
+    "totalTokens": 191630
+   }
+  },
+  {
+   "msgId": "m-0053",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536682264,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 408,
+    "outputTokens": 672,
+    "cacheReadTokens": 191533,
+    "totalTokens": 192613
+   }
+  },
+  {
+   "msgId": "m-0054",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536704918,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 4193,
+    "outputTokens": 2359,
+    "cacheReadTokens": 191941,
+    "totalTokens": 198493
+   }
+  },
+  {
+   "msgId": "m-0055",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536713782,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 5034,
+    "outputTokens": 691,
+    "cacheReadTokens": 196134,
+    "totalTokens": 201859
+   }
+  },
+  {
+   "msgId": "m-0056",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536718969,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1099,
+    "outputTokens": 304,
+    "cacheReadTokens": 201168,
+    "totalTokens": 202571
+   }
+  },
+  {
+   "msgId": "m-0057",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536735383,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 636,
+    "outputTokens": 2096,
+    "cacheReadTokens": 202267,
+    "totalTokens": 204999
+   }
+  },
+  {
+   "msgId": "m-0058",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536741623,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2203,
+    "outputTokens": 207,
+    "cacheReadTokens": 202903,
+    "totalTokens": 205313
+   }
+  },
+  {
+   "msgId": "m-0059",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536746396,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 395,
+    "outputTokens": 208,
+    "cacheReadTokens": 205106,
+    "totalTokens": 205709
+   }
+  },
+  {
+   "msgId": "m-0060",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536753403,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 344,
+    "outputTokens": 276,
+    "cacheReadTokens": 205501,
+    "totalTokens": 206121
+   }
+  },
+  {
+   "msgId": "m-0061",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536763385,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 486,
+    "outputTokens": 456,
+    "cacheReadTokens": 205845,
+    "totalTokens": 206787
+   }
+  },
+  {
+   "msgId": "m-0062",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536783638,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 563,
+    "outputTokens": 285,
+    "cacheReadTokens": 206331,
+    "totalTokens": 207179
+   }
+  },
+  {
+   "msgId": "m-0063",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536881750,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 312,
+    "outputTokens": 425,
+    "cacheReadTokens": 206894,
+    "totalTokens": 207631
+   }
+  },
+  {
+   "msgId": "m-0064",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536897662,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 759,
+    "outputTokens": 721,
+    "cacheReadTokens": 207206,
+    "totalTokens": 208686
+   }
+  },
+  {
+   "msgId": "m-0065",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536904483,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 894,
+    "outputTokens": 477,
+    "cacheReadTokens": 207965,
+    "totalTokens": 209336
+   }
+  },
+  {
+   "msgId": "m-0066",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536926373,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 683,
+    "outputTokens": 274,
+    "cacheReadTokens": 208859,
+    "totalTokens": 209816
+   }
+  },
+  {
+   "msgId": "m-0067",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536931647,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 445,
+    "outputTokens": 89,
+    "cacheReadTokens": 209542,
+    "totalTokens": 210076
+   }
+  },
+  {
+   "msgId": "m-0068",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536942168,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 6107,
+    "outputTokens": 854,
+    "cacheReadTokens": 209987,
+    "totalTokens": 216948
+   }
+  },
+  {
+   "msgId": "m-0069",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536962495,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1036,
+    "outputTokens": 272,
+    "cacheReadTokens": 216094,
+    "totalTokens": 217402
+   }
+  },
+  {
+   "msgId": "m-0070",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795536998986,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 317,
+    "outputTokens": 534,
+    "cacheReadTokens": 217130,
+    "totalTokens": 217981
+   }
+  },
+  {
+   "msgId": "m-0071",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537011806,
+   "toolCallCount": 1,
+   "usage": {
+    "inputTokens": 580,
+    "outputTokens": 989,
+    "cacheReadTokens": 217447,
+    "totalTokens": 219016
+   }
+  },
+  {
+   "msgId": "m-0072",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537020905,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1028,
+    "outputTokens": 169,
+    "cacheReadTokens": 218027,
+    "totalTokens": 219224
+   }
+  },
+  {
+   "msgId": "m-0073",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537029589,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 271,
+    "outputTokens": 286,
+    "cacheReadTokens": 219055,
+    "totalTokens": 219612
+   }
+  },
+  {
+   "msgId": "m-0074",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537046115,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1400,
+    "outputTokens": 1373,
+    "cacheReadTokens": 219326,
+    "totalTokens": 222099
+   }
+  },
+  {
+   "msgId": "m-0075",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537062067,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 5077,
+    "outputTokens": 705,
+    "cacheReadTokens": 220726,
+    "totalTokens": 226508
+   }
+  },
+  {
+   "msgId": "m-0076",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537069507,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 760,
+    "outputTokens": 298,
+    "cacheReadTokens": 225803,
+    "totalTokens": 226861
+   }
+  },
+  {
+   "msgId": "m-0077",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537099823,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 493,
+    "outputTokens": 228,
+    "cacheReadTokens": 226563,
+    "totalTokens": 227284
+   }
+  },
+  {
+   "msgId": "m-0078",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537106175,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 286,
+    "outputTokens": 92,
+    "cacheReadTokens": 227056,
+    "totalTokens": 227434
+   }
+  },
+  {
+   "msgId": "m-0079",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537126954,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 519,
+    "outputTokens": 564,
+    "cacheReadTokens": 227342,
+    "totalTokens": 228425
+   }
+  },
+  {
+   "msgId": "m-0080",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537158416,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 822,
+    "outputTokens": 325,
+    "cacheReadTokens": 227861,
+    "totalTokens": 229008
+   }
+  },
+  {
+   "msgId": "m-0081",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537170898,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 412,
+    "outputTokens": 525,
+    "cacheReadTokens": 228683,
+    "totalTokens": 229620
+   }
+  },
+  {
+   "msgId": "m-0082",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537181406,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 2963,
+    "outputTokens": 416,
+    "cacheReadTokens": 229095,
+    "totalTokens": 232474
+   }
+  },
+  {
+   "msgId": "m-0083",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537204195,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1289,
+    "outputTokens": 2779,
+    "cacheReadTokens": 232058,
+    "totalTokens": 236126
+   }
+  },
+  {
+   "msgId": "m-0084",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537234321,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2830,
+    "outputTokens": 1831,
+    "cacheReadTokens": 233347,
+    "totalTokens": 238008
+   }
+  },
+  {
+   "msgId": "m-0085",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537244431,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1866,
+    "outputTokens": 970,
+    "cacheReadTokens": 236177,
+    "totalTokens": 239013
+   }
+  },
+  {
+   "msgId": "m-0086",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537251948,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1014,
+    "outputTokens": 329,
+    "cacheReadTokens": 238043,
+    "totalTokens": 239386
+   }
+  },
+  {
+   "msgId": "m-0087",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537261909,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 370,
+    "outputTokens": 219,
+    "cacheReadTokens": 239057,
+    "totalTokens": 239646
+   }
+  },
+  {
+   "msgId": "m-0088",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537273841,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1168,
+    "outputTokens": 330,
+    "cacheReadTokens": 239427,
+    "totalTokens": 240925
+   }
+  },
+  {
+   "msgId": "m-0089",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537291179,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 563,
+    "outputTokens": 795,
+    "cacheReadTokens": 240595,
+    "totalTokens": 241953
+   }
+  },
+  {
+   "msgId": "m-0090",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537312629,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1066,
+    "outputTokens": 743,
+    "cacheReadTokens": 241158,
+    "totalTokens": 242967
+   }
+  },
+  {
+   "msgId": "m-0091",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537337940,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 818,
+    "outputTokens": 129,
+    "cacheReadTokens": 242224,
+    "totalTokens": 243171
+   }
+  },
+  {
+   "msgId": "m-0092",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537354287,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 5062,
+    "outputTokens": 1800,
+    "cacheReadTokens": 243042,
+    "totalTokens": 249904
+   }
+  },
+  {
+   "msgId": "m-0093",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537381215,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1853,
+    "outputTokens": 130,
+    "cacheReadTokens": 248104,
+    "totalTokens": 250087
+   }
+  },
+  {
+   "msgId": "m-0094",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537485914,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1821,
+    "outputTokens": 2968,
+    "cacheReadTokens": 249957,
+    "totalTokens": 254746
+   }
+  },
+  {
+   "msgId": "m-0095",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537505808,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 9058,
+    "outputTokens": 2619,
+    "cacheReadTokens": 251778,
+    "totalTokens": 263455
+   }
+  },
+  {
+   "msgId": "m-0096",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537555622,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2681,
+    "outputTokens": 282,
+    "cacheReadTokens": 260836,
+    "totalTokens": 263799
+   }
+  },
+  {
+   "msgId": "m-0097",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537602244,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 3097,
+    "outputTokens": 450,
+    "cacheReadTokens": 263517,
+    "totalTokens": 267064
+   }
+  },
+  {
+   "msgId": "m-0098",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537612909,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1928,
+    "outputTokens": 561,
+    "cacheReadTokens": 266614,
+    "totalTokens": 269103
+   }
+  },
+  {
+   "msgId": "m-0099",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537633593,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 745,
+    "outputTokens": 1577,
+    "cacheReadTokens": 268542,
+    "totalTokens": 270864
+   }
+  },
+  {
+   "msgId": "m-0100",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537639240,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1847,
+    "outputTokens": 437,
+    "cacheReadTokens": 269287,
+    "totalTokens": 271571
+   }
+  },
+  {
+   "msgId": "m-0101",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537662383,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 683,
+    "outputTokens": 718,
+    "cacheReadTokens": 271134,
+    "totalTokens": 272535
+   }
+  },
+  {
+   "msgId": "m-0102",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537673863,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1162,
+    "outputTokens": 600,
+    "cacheReadTokens": 271817,
+    "totalTokens": 273579
+   }
+  },
+  {
+   "msgId": "m-0103",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537681585,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 980,
+    "outputTokens": 261,
+    "cacheReadTokens": 272979,
+    "totalTokens": 274220
+   }
+  },
+  {
+   "msgId": "m-0104",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537765264,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 448,
+    "outputTokens": 253,
+    "cacheReadTokens": 273959,
+    "totalTokens": 274660
+   }
+  },
+  {
+   "msgId": "m-0105",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537793833,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 6045,
+    "outputTokens": 2406,
+    "cacheReadTokens": 274407,
+    "totalTokens": 282858
+   }
+  },
+  {
+   "msgId": "m-0106",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537816587,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2792,
+    "outputTokens": 389,
+    "cacheReadTokens": 280452,
+    "totalTokens": 283633
+   }
+  },
+  {
+   "msgId": "m-0107",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537843466,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 441,
+    "outputTokens": 1632,
+    "cacheReadTokens": 283244,
+    "totalTokens": 285317
+   }
+  },
+  {
+   "msgId": "m-0108",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537868456,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1931,
+    "outputTokens": 1151,
+    "cacheReadTokens": 283685,
+    "totalTokens": 286767
+   }
+  },
+  {
+   "msgId": "m-0109",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537887148,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1347,
+    "outputTokens": 1004,
+    "cacheReadTokens": 285616,
+    "totalTokens": 287967
+   }
+  },
+  {
+   "msgId": "m-0110",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537919061,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1556,
+    "outputTokens": 2947,
+    "cacheReadTokens": 286963,
+    "totalTokens": 291466
+   }
+  },
+  {
+   "msgId": "m-0111",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537936051,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 3056,
+    "outputTokens": 903,
+    "cacheReadTokens": 288519,
+    "totalTokens": 292478
+   }
+  },
+  {
+   "msgId": "m-0112",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795537980020,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1176,
+    "outputTokens": 2195,
+    "cacheReadTokens": 291575,
+    "totalTokens": 294946
+   }
+  },
+  {
+   "msgId": "m-0113",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538014313,
+   "toolCallCount": 5,
+   "usage": {
+    "inputTokens": 4775,
+    "outputTokens": 2733,
+    "cacheReadTokens": 292751,
+    "totalTokens": 300259
+   }
+  },
+  {
+   "msgId": "m-0114",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538028313,
+   "toolCallCount": 5,
+   "usage": {
+    "inputTokens": 2940,
+    "outputTokens": 625,
+    "cacheReadTokens": 297526,
+    "totalTokens": 301091
+   }
+  },
+  {
+   "msgId": "m-0115",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538052825,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 832,
+    "outputTokens": 4785,
+    "cacheReadTokens": 300466,
+    "totalTokens": 306083
+   }
+  },
+  {
+   "msgId": "m-0116",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538066836,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 4849,
+    "outputTokens": 1551,
+    "cacheReadTokens": 301298,
+    "totalTokens": 307698
+   }
+  },
+  {
+   "msgId": "m-0117",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538078580,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1615,
+    "outputTokens": 244,
+    "cacheReadTokens": 306147,
+    "totalTokens": 308006
+   }
+  },
+  {
+   "msgId": "m-0118",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538083345,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 428,
+    "outputTokens": 95,
+    "cacheReadTokens": 307762,
+    "totalTokens": 308285
+   }
+  },
+  {
+   "msgId": "m-0119",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538098352,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 701,
+    "outputTokens": 387,
+    "cacheReadTokens": 308190,
+    "totalTokens": 309278
+   }
+  },
+  {
+   "msgId": "m-0120",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538227145,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 843,
+    "outputTokens": 784,
+    "cacheReadTokens": 308891,
+    "totalTokens": 310518
+   }
+  },
+  {
+   "msgId": "m-0121",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538241823,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 3247,
+    "outputTokens": 1106,
+    "cacheReadTokens": 309734,
+    "totalTokens": 314087
+   }
+  },
+  {
+   "msgId": "m-0122",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538253114,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1503,
+    "outputTokens": 603,
+    "cacheReadTokens": 312981,
+    "totalTokens": 315087
+   }
+  },
+  {
+   "msgId": "m-0123",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538264136,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 799,
+    "outputTokens": 128,
+    "cacheReadTokens": 314484,
+    "totalTokens": 315411
+   }
+  },
+  {
+   "msgId": "m-0124",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538281665,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 276,
+    "outputTokens": 1311,
+    "cacheReadTokens": 315283,
+    "totalTokens": 316870
+   }
+  },
+  {
+   "msgId": "m-0125",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538287997,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1567,
+    "outputTokens": 229,
+    "cacheReadTokens": 315559,
+    "totalTokens": 317355
+   }
+  },
+  {
+   "msgId": "m-0126",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538308083,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 2061,
+    "outputTokens": 1414,
+    "cacheReadTokens": 317126,
+    "totalTokens": 320601
+   }
+  },
+  {
+   "msgId": "m-0127",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538316777,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1671,
+    "outputTokens": 608,
+    "cacheReadTokens": 319187,
+    "totalTokens": 321466
+   }
+  },
+  {
+   "msgId": "m-0128",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538326734,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1066,
+    "outputTokens": 967,
+    "cacheReadTokens": 320858,
+    "totalTokens": 322891
+   }
+  },
+  {
+   "msgId": "m-0129",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538336271,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1714,
+    "outputTokens": 381,
+    "cacheReadTokens": 321924,
+    "totalTokens": 324019
+   }
+  },
+  {
+   "msgId": "m-0130",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538344829,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2046,
+    "outputTokens": 906,
+    "cacheReadTokens": 323638,
+    "totalTokens": 326590
+   }
+  },
+  {
+   "msgId": "m-0131",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538354493,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1151,
+    "outputTokens": 1319,
+    "cacheReadTokens": 325684,
+    "totalTokens": 328154
+   }
+  },
+  {
+   "msgId": "m-0132",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538362588,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1788,
+    "outputTokens": 333,
+    "cacheReadTokens": 326835,
+    "totalTokens": 328956
+   }
+  },
+  {
+   "msgId": "m-0133",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538378068,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1091,
+    "outputTokens": 973,
+    "cacheReadTokens": 328623,
+    "totalTokens": 330687
+   }
+  },
+  {
+   "msgId": "m-0134",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538382565,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1060,
+    "outputTokens": 107,
+    "cacheReadTokens": 329714,
+    "totalTokens": 330881
+   }
+  },
+  {
+   "msgId": "m-0135",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538388918,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 439,
+    "outputTokens": 176,
+    "cacheReadTokens": 330774,
+    "totalTokens": 331389
+   }
+  },
+  {
+   "msgId": "m-0136",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538411165,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1464,
+    "outputTokens": 1732,
+    "cacheReadTokens": 331213,
+    "totalTokens": 334409
+   }
+  },
+  {
+   "msgId": "m-0137",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538426322,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 3354,
+    "outputTokens": 1356,
+    "cacheReadTokens": 332677,
+    "totalTokens": 337387
+   }
+  },
+  {
+   "msgId": "m-0138",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538436450,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2397,
+    "outputTokens": 234,
+    "cacheReadTokens": 336031,
+    "totalTokens": 338662
+   }
+  },
+  {
+   "msgId": "m-0139",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538445014,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 358,
+    "outputTokens": 400,
+    "cacheReadTokens": 338428,
+    "totalTokens": 339186
+   }
+  },
+  {
+   "msgId": "m-0140",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538457222,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 690,
+    "outputTokens": 553,
+    "cacheReadTokens": 338786,
+    "totalTokens": 340029
+   }
+  },
+  {
+   "msgId": "m-0141",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538465471,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 995,
+    "outputTokens": 571,
+    "cacheReadTokens": 339476,
+    "totalTokens": 341042
+   }
+  },
+  {
+   "msgId": "m-0142",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538486770,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 779,
+    "outputTokens": 896,
+    "cacheReadTokens": 340471,
+    "totalTokens": 342146
+   }
+  },
+  {
+   "msgId": "m-0143",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538510309,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1836,
+    "outputTokens": 2268,
+    "cacheReadTokens": 341250,
+    "totalTokens": 345354
+   }
+  },
+  {
+   "msgId": "m-0144",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538519604,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2575,
+    "outputTokens": 800,
+    "cacheReadTokens": 343086,
+    "totalTokens": 346461
+   }
+  },
+  {
+   "msgId": "m-0145",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538542658,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 891,
+    "outputTokens": 1691,
+    "cacheReadTokens": 345661,
+    "totalTokens": 348243
+   }
+  },
+  {
+   "msgId": "m-0146",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538558324,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 1999,
+    "outputTokens": 599,
+    "cacheReadTokens": 346552,
+    "totalTokens": 349150
+   }
+  },
+  {
+   "msgId": "m-0147",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538567279,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 905,
+    "outputTokens": 711,
+    "cacheReadTokens": 348551,
+    "totalTokens": 350167
+   }
+  },
+  {
+   "msgId": "m-0148",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538576207,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 3493,
+    "outputTokens": 771,
+    "cacheReadTokens": 349456,
+    "totalTokens": 353720
+   }
+  },
+  {
+   "msgId": "m-0149",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538592836,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 840,
+    "outputTokens": 908,
+    "cacheReadTokens": 352949,
+    "totalTokens": 354697
+   }
+  },
+  {
+   "msgId": "m-0150",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538608196,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 934,
+    "outputTokens": 804,
+    "cacheReadTokens": 353789,
+    "totalTokens": 355527
+   }
+  },
+  {
+   "msgId": "m-0151",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538649710,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 1348,
+    "outputTokens": 1697,
+    "cacheReadTokens": 354723,
+    "totalTokens": 357768
+   }
+  },
+  {
+   "msgId": "m-0152",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538662067,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2412,
+    "outputTokens": 440,
+    "cacheReadTokens": 356071,
+    "totalTokens": 358923
+   }
+  },
+  {
+   "msgId": "m-0153",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538675161,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 645,
+    "outputTokens": 980,
+    "cacheReadTokens": 358483,
+    "totalTokens": 360108
+   }
+  },
+  {
+   "msgId": "m-0154",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538693383,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 1106,
+    "outputTokens": 363,
+    "cacheReadTokens": 359128,
+    "totalTokens": 360597
+   }
+  },
+  {
+   "msgId": "m-0155",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538712827,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 905,
+    "outputTokens": 1186,
+    "cacheReadTokens": 360234,
+    "totalTokens": 362325
+   }
+  },
+  {
+   "msgId": "m-0156",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538724151,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 1800,
+    "outputTokens": 355,
+    "cacheReadTokens": 361139,
+    "totalTokens": 363294
+   }
+  },
+  {
+   "msgId": "m-0157",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538746578,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 493,
+    "outputTokens": 412,
+    "cacheReadTokens": 362939,
+    "totalTokens": 363844
+   }
+  },
+  {
+   "msgId": "m-0158",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538790433,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1581,
+    "outputTokens": 3739,
+    "cacheReadTokens": 363432,
+    "totalTokens": 368752
+   }
+  },
+  {
+   "msgId": "m-0159",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538811119,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 4204,
+    "outputTokens": 1780,
+    "cacheReadTokens": 365013,
+    "totalTokens": 370997
+   }
+  },
+  {
+   "msgId": "m-0160",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538823873,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 2092,
+    "outputTokens": 922,
+    "cacheReadTokens": 369217,
+    "totalTokens": 372231
+   }
+  },
+  {
+   "msgId": "m-0161",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538839652,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 944,
+    "outputTokens": 582,
+    "cacheReadTokens": 371309,
+    "totalTokens": 372835
+   }
+  },
+  {
+   "msgId": "m-0162",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538861264,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 743,
+    "outputTokens": 611,
+    "cacheReadTokens": 372253,
+    "totalTokens": 373607
+   }
+  },
+  {
+   "msgId": "m-0163",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538882279,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 1118,
+    "outputTokens": 802,
+    "cacheReadTokens": 372996,
+    "totalTokens": 374916
+   }
+  },
+  {
+   "msgId": "m-0164",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538898156,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1184,
+    "outputTokens": 1072,
+    "cacheReadTokens": 374114,
+    "totalTokens": 376370
+   }
+  },
+  {
+   "msgId": "m-0165",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795538910030,
+   "toolCallCount": 3,
+   "usage": {
+    "inputTokens": 1419,
+    "outputTokens": 1167,
+    "cacheReadTokens": 375298,
+    "totalTokens": 377884
+   }
+  },
+  {
+   "msgId": "m-0166",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795539041362,
+   "toolCallCount": 4,
+   "usage": {
+    "inputTokens": 1503,
+    "outputTokens": 288,
+    "cacheReadTokens": 376717,
+    "totalTokens": 378508
+   }
+  },
+  {
+   "msgId": "m-0167",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795539058508,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 348,
+    "outputTokens": 1086,
+    "cacheReadTokens": 378220,
+    "totalTokens": 379654
+   }
+  },
+  {
+   "msgId": "m-0168",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795539071139,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 1186,
+    "outputTokens": 741,
+    "cacheReadTokens": 378568,
+    "totalTokens": 380495
+   }
+  },
+  {
+   "msgId": "m-0169",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795539081874,
+   "toolCallCount": 2,
+   "usage": {
+    "inputTokens": 828,
+    "outputTokens": 961,
+    "cacheReadTokens": 379754,
+    "totalTokens": 381543
+   }
+  },
+  {
+   "msgId": "m-0170",
+   "turnId": "turn-1",
+   "role": "assistant",
+   "createdAtMs": 1795539097732,
+   "toolCallCount": 0,
+   "usage": {
+    "inputTokens": 1589,
+    "outputTokens": 2448,
+    "cacheReadTokens": 380582,
+    "totalTokens": 384619
+   }
+  }
+ ]
+}

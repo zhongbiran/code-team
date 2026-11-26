@@ -117,7 +117,7 @@ CODE_TEAM_EVENTS=<临时事件流路径> node scripts/record-event.mjs list
 node scripts/lessons.mjs record "<纠正内容>"
 node scripts/lessons.mjs list
 node scripts/lessons.mjs promote <ID> "<检查脚本名>" "<描述>"
-node scripts/lessons.mjs check        # 发布把关总入口
+node scripts/lessons.mjs check [--briefs <目录>] [--project <根目录>]   # 发布把关总入口
 node scripts/lessons.mjs list-checks  # 只列将要跑的检查，不执行
 ```
 
@@ -305,3 +305,106 @@ Overmind 做所有非代码决策（方案、拆包、brief）；Coder 只做代
 **Q：验收到底做几次？**
 一次。全部包完成后派 `verifier` 一次（干净 context）。
 不要「主会话自验一遍 + 再派 verifier 复核一遍」——那是重复劳动。
+## 十三、派工标记与闸门（宿主自动执行）
+
+宿主 hook 在 `task` / `task_append` 每次派工前自动判一次（注册在 `hooks/hooks.json`，判定脚本
+`scripts/dispatch-hook.mjs`），不合格直接拒绝，Task 不会被创建。四道闸：
+
+| 闸 | 判定口径 | 判定脚本 |
+|---|---|---|
+| 1 编译闸 | brief 验收段必须含**编译**；`-ChecksOnly` 是纯静态检查，不编译 | `checks/brief-requires-compile-gate.mjs` |
+| 2 文件归属互斥 | 每份 brief 有「文件归属」段，两份归属清单不得有交集 | `checks/brief-file-ownership-disjoint.mjs` |
+| 3 额度余量 | 真实用量（cacheRead / decode / toolCalls），同一包累计越界自动要求拆包 | `scripts/trajectory-usage.mjs` |
+| 4 隔离红线 | Worker 测试不得连生产库 / 现场 Redis / 现场数据库 | 写进 brief，由执行者与验收各守一次 |
+
+手跑核对（发布把关总入口，brief 参数会透传给上面两道闸）：
+
+```bash
+node scripts/lessons.mjs check                                   # 随包检查 + 台账已升级的检查
+node scripts/lessons.mjs check --briefs <本轮 brief 目录>          # 用本轮样本跑编译闸 / 归属闸
+node scripts/lessons.mjs check --briefs <目录> --project <项目根>   # 再指定目标项目根
+```
+
+`--briefs` 指向的目录里没有 .md brief 时，闸门**判失败**（零样本通过不算数）；不传时扫插件自带的
+`briefs/` 与 `tmp/` 目录。随包检查与台账条目**按文件名合并去重**，同名只跑一次；
+检查脚本不许再调总入口（递归由 `CODE_TEAM_CHECK_DEPTH` 挡住）。
+
+派工时必须带的标记（缺一个就被 hook 拒绝）：
+
+```
+code-team-plan: <计划版本>
+code-team-package: <包号>
+code-team-brief-ref: {"planRevisionId":…,"packageId":…,"artifactId":…,"sha256":…,"byteLength":…}
+```
+
+- `code-team-plan` 给出**批次边界**：归属互斥只在同一个 plan 内比较。
+- `code-team-package` 给出**包号**：没有包号就认不出「同一个包的重派」，也拿不到这个包的真实用量。
+- `code-team-brief-ref` 是 brief 产物引用：正文由 Overmind 发布、宿主按引用核对后装进 prompt，
+  **手写正文一律退 2**。校验口径 = sha256 + planRevisionId + packageId；引用必须绑定同一项目，
+  跨项目复用靠账本绑定拦住。注入按工具实际的正文键：`task` 进 `prompt`，`task_append` 进 `content`。
+- Worker 在别的目录干活（多 worktree 仓库）时加一行 `code-team-worktree: <工作树绝对路径>`：
+  hook 记下基线提交，撞墙续派按「基线..HEAD」取证，否则干净树上的已提交变更会被当成零落盘。
+
+续派与验收的标记：
+
+- 续派（`task_append`）带 `code-team-retry: {…}` 与
+  `code-team-continuation: {"persistedWork":…,"remainingWork":…}`（两段缺一不可）。宿主真实入参只有
+  `{task_id, content}`，没有 agent_name，hook 靠派工账本还原角色与包号；认不出归属就退 2，不兜底放行。
+- 续派的失败证据（机器码 / 失败时刻 / attempt / 原并发 / 批次 / 原 Worker 工作树）**只认派工账本**，
+  提示词里写的不算（只能做交叉校验，写错反而会被拒）。
+- 验收派工带 `code-team-verification-key: {"planId":…,"criteriaRevisionId":…}`：同一验收口径第二次
+  派工会被拒（状态落盘 `PLUGIN_DATA/verification-state.json`）。
+- 验收结论带 `code-team-verification-evidence: {"outputRefs":[…]}`；判 FAIL 还要带 `commands` 与
+  `exitCodes`。**没有证据引用的结论不落盘。**
+- 执行者交自证时带 `code-team-self-evidence: {…}`（挂在同一条验收记录上，不重派 Verifier）。
+
+某个闸的模块缺失或报错时，hook **按模块降级**：与本次派工相关的闸降级 = 直接拒绝并写明
+「该闸未生效：<模块> <原因>」；不相关的闸降级只记进事件。排障时可用环境变量 `CODE_TEAM_GATE=off`
+临时关闭（别常开）。
+
+## 十四、上下文窗口纪律（2026-11-26）
+
+**别给执行侧子代理开 1M 上下文。** 每次模型调用都重发整段累积上下文，窗口越大，token 消耗按
+累积上下文线性放大——缓存读取同样计费（实测 cacheRead 占总用量 96.9%）。本机已把
+`defaultModelContextWindow` 从 1000000 降到 **512000**（模型自身上限本来就是 512000，1M 只是
+标 `higher_usage` 的可选项），实测新开的 worker 会话 `contextWindowTokens = 512000`，无需重启宿主。
+
+代价：压缩会更早发生。worker 的长任务靠 brief + 文件落盘交接，别让它把整份源码读进上下文来「记住」。
+
+## 十五、拆包规模判据（2026-11-24 实测）
+
+- **单包首跑超过 30 分钟就是包太大**，拆细。两个实测反例：模拟引擎包与 WebAdmin 历史包首跑
+  3.5 小时后撞额度被杀；同期只改一个枚举规则的包 32 分钟收工。
+- **改动共享层（Application 层公共文件）的包单独成包**，且不与其它包并行。
+- **调研与实现分开**：先派 `explore` 只读取证（一个包只查一个主题；实测一次塞 5 个主题，输出循环
+  卡死后被杀），证据落盘后再派实现。
+- **不要三层重复读同一批代码**：Overmind 已给 file:line 裁定，Coder 与主会话不必再抄一遍，
+  brief 里带结论即可。
+- 额度中断的包**不重派同一个 brief**：先 `git status` 核查落盘深度，续派任务书写明「已落盘什么 /
+  没做什么」，否则新 Worker 会从零重写或覆盖已有实现。
+
+## 十六、复盘六条硬规则的出处
+
+规则全文见 `references/lessons-2026-11-25-postmortem.md`（2026-11-25 RC.DustFall 12 项复盘：
+总 token ≈ 4.58 亿，cacheRead 占 96.9%，撞 5h 限额 3 次，返工链吃掉 41%）。六条规则的落地位置：
+闸门在 `scripts/dispatch-hook.mjs`，真实用量在 `scripts/trajectory-usage.mjs`，撞墙续派在
+`scripts/retry-policy.mjs`，一次验收在 `scripts/verification-policy.mjs`。
+
+## 十七、典型用法与节奏
+
+```
+你：给设备加个导出 CSV 功能，用 Code Team
+
+主会话：把需求原样转交 Overmind（主会话不判断该不该开）
+Overmind：真跑命令核实现状 → 决策记录（理由/放弃的方案/代价）→ 拆包 → 每包 brief → 指明哪几包要 Coder
+主会话：原样转发
+Coder：按 Overmind 指明介入 A 包，给参数识别顺序和数据流结论
+主会话：原样转发 brief 引用给 Worker ×N（并行，文件不重叠）
+Worker：按 brief 执行，只改自己那几个文件，自测
+主会话：派 Verifier 一次（干净 context）
+主会话：核对 → 汇报
+```
+
+中途要补充或改主意：直接说，主会话会 `--resume` 追加给 Overmind（复用缓存，不重开）——
+**不要指望主会话自己消化你的补充**。
+

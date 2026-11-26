@@ -3,7 +3,7 @@
   "name": "code-team",
   "displayName": "Code Team",
   "version": "1.2.0",
-  "description": "多 Agent 协作工作流：主会话编排，Codex CLI 担任 Overmind（总策划）与 Coder（编码方向规划），并用 worker/explore/verifier 三个子代理并行落地。带额度守卫，避免规划期空烧 token。",
+  "description": "多 Agent 协作工作流：主会话编排，Codex CLI 担任 Overmind（总策划）与 Coder（编码方向规划），并用 worker/explore/verifier 三个子代理并行落地。带额度守卫，避免规划期空烧 token；派工前由宿主 hook 自动拦截不合格的 brief（编译闸 + 文件归属互斥），不再依赖人记得跑脚本。",
   "author": "钟必然",
   "icon": "icon.png",
   "darkIcon": "icon-dark.png",

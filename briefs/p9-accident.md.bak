@@ -1,0 +1,6 @@
+# 任务包 P9
+## 文件归属（只改这些）
+- `Src/02-Application/RC.DustFall.Application/Domain/Helper/SimulationEngine.cs`
+- `Src/04-Web/RC.DustFall.Web/Components/Pages/ControlHistory.razor`
+## 验收
+编译 0 错误，`pwsh -File Scripts\verify.ps1 -ChecksOnly` 通过
