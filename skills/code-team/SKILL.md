@@ -9,7 +9,7 @@ metadata:
 
 决策权在 Overmind，不在主会话。主会话是**侧边会话**：转交需求、转发结果、追加用户的问题，不做判断。
 
-细节都在插件根目录的 `references/usage.md`（角色与 skill 名单、事件字段、模式交接细则、命令清单、常见问题）。本文件只留入口与红线。
+细节都在插件根目录的 `references/usage.md`（角色与 skill 名单、事件字段、派工标记与三道闸、上下文纪律、命令清单、常见问题）。本文件只留入口与红线。
 
 ## Quick start
 
@@ -20,7 +20,7 @@ metadata:
 5) 派工：用 Task 工具派 `worker` / `explore` / `verifier`；提示末尾**同时贴两份输出**——`node scripts/skills-for.mjs <role>`（用哪个方法论）与 `node scripts/dispatch-params.mjs <role>`（已保存的 model / effort / agent），Task 参数照抄后者的 `taskArgs`。**控制台里改过 model/effort 之后必须用 dispatch-params 的输出，否则改了不生效。**每包一个 brief，改动文件互不重叠，单包控制在 20 分钟内。
 6) 记事件：派工前后各一条 `node scripts/record-event.mjs record --kind dispatch ...`（`--project` / `--session` / `--task` / `--skill` 必填，否则统计断链）。
 7) 验收：全部包完成后派 `verifier` 一次，`run_in_background=false`。**不要自己先验一遍再让 Verifier 验一遍。**
-8) 收尾：同一条纠正出现两次 → `node scripts/lessons.mjs record` / `list` / `promote`；发布把关跑总入口 `node scripts/lessons.mjs check`（空台账也照跑随包检查）。
+8) 收尾：同一条纠正出现两次 → `node scripts/lessons.mjs record` / `list` / `promote`；发布把关跑总入口 `node scripts/lessons.mjs check [--briefs <本轮 brief 目录>]`（空台账也照跑随包检查）。
 
 ## Tool-call guardrails
 
@@ -29,6 +29,17 @@ metadata:
 - 宿主无法兑现的参数（如某个 model/effort 选项）要在汇报里写明原因，**不许伪造已生效或在调用时静默丢弃**。
 - `dispatch-params` 的 `status` 是 `CAPABILITY_UNKNOWN` 时，**不许伪造已生效**：那一项没下传，原值在 `requested` 里——按原值向用户说明，让用户改配置或换模型，不要手填一个值塞进 Task 参数。
 - 检查脚本报红就修代码或修脚本，**不要改检查让它变绿**。
+
+## 派工前的闸门（宿主自动执行）
+
+闸门挂在宿主 hook 上（注册在 `hooks/hooks.json`，判定脚本 `scripts/dispatch-hook.mjs`）：`task` / `task_append` 每次派工前自动判一次，不合格直接拒绝，Task 不会被创建。**不要靠「记得跑脚本」，也不要改 hook 配置去绕过拒绝。**手跑核对用 `node scripts/lessons.mjs check [--briefs <本轮 brief 目录>]`。
+
+- 闸 1 · 编译闸：brief 的验收段必须含**编译**（`-ChecksOnly` 只是静态检查，不编译）。判定 `checks/brief-requires-compile-gate.mjs`。
+- 闸 2 · 文件归属互斥：每份 brief 都要有「文件归属」段，且两份归属清单不得有交集。判定 `checks/brief-file-ownership-disjoint.mjs`。
+- 闸 3 · 额度余量：真实用量闸已接进 hook（`scripts/trajectory-usage.mjs`），同一包累计越界会自动要求拆包 / 重拆。
+- 闸 4 · 隔离红线：Worker 的测试**不得连生产库 / 现场 Redis / 现场数据库**，隔离由仓库自带机制决定。
+
+派工标记（`code-team-plan` / `code-team-package` / `code-team-brief-ref`）、续派契约与验收证据格式见 `references/usage.md`。
 
 ## 何时触发
 
@@ -84,6 +95,7 @@ brief 由 Overmind 写：主会话不补需求的隐含条件，也不替它写 
 - 一次任务 Overmind **至多 1 次**、Coder **至多 2 次**。
 - 用户追加问题用 `--resume` 复用同一线程与前缀缓存，**不重开**。
 - 规划期 Codex 一律只读；实现只由 Worker 做。
+- **上下文窗口**：执行侧子代理统一 **512k**，**不要开 1M**——每次模型调用都重发整段累积上下文，窗口越大 token 越贵（缓存读取同样计费）。
 - 看用量：`node scripts/codex-team.mjs budget`。
 
 ## 缺插件 / 缺后端降级
@@ -98,6 +110,17 @@ brief 由 Overmind 写：主会话不补需求的隐含条件，也不替它写 
 
 ## 硬规则
 
+本轮复盘定下的六条（数据与根因见 `references/lessons-2026-11-25-postmortem.md`）：
+
+1. **闸门必须是 hook / CI**，不是需要人记得跑的脚本。
+2. **守卫读真实 usage**（cacheRead / decode / toolCalls），不用「包数 / 12」这种经验值。
+3. **撞墙后禁止同分钟重派同规模任务**：先降并发 + `git status` 核查落盘深度 + 续派书写明「已落盘什么 / 没做什么」。
+4. **brief 由 Overmind 落盘，主会话不转写**——转写就是改写，改写就是绕过决策权边界。
+5. **验收一次**：首轮 FAIL 由执行者自证修复，Verifier 不复验第二遍（除非改动了验收口径本身）。
+6. **成本闸看 toolCalls**：单包 > 200 次 tool 调用 = 包太大，拆；> 60M token = 包有结构问题，重拆。
+
+其余红线：
+
 - 决策调用一律走 `scripts/codex-team.mjs`，不裸跑 `codex exec`；换 codex 模型前用 `codex debug models` 确认 id 有效。
 - 每次派工都记事件，带 `--project`、`--session`、`--task`、`--skill`。
 - Worker 与 Codex 不同时改同一批文件。
@@ -105,5 +128,5 @@ brief 由 Overmind 写：主会话不补需求的隐含条件，也不替它写 
 - 每条结论要么有证据，要么标注是假设。
 - brief 的 Done 栏只给「一条命令 + 期望输出」——穷举测试场景会削弱执行者判断。
 - 改 `config/team.json` 的 skill 名单后跑 `node checks/skills-exist.mjs`：skill 名写错是隐形失败，流程照跑但方法论从没被加载过。
-- 已保存的 model/effort 必须经 `scripts/dispatch-params.mjs` 进入 Task 参数：控制台改了不手动带进去，等于没改
+- 已保存的 model/effort 必须经 `scripts/dispatch-params.mjs` 进入 Task 参数：控制台改了不手动带进去，等于没改。
 - 发布把关总入口：`node scripts/lessons.mjs check`（随包检查 + 台账已升级的检查，合并去重；台账引用缺失就报错）。

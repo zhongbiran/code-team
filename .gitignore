@@ -1,13 +1,13 @@
-# 运行时数据：每次调用都在变，不进版本库
+# 产物目录：每次发布 brief 会生成，按计划版本落地，不进版本库
+artifacts/
+
+# 会话工作稿（需求/计划/验收任务书），临时产物
+tmp-*.md
+
+# 运行期账本（每次派工追加，会持续变动）
 config/events.jsonl
 config/usage-ledger.json
-config/lessons.json
 
-# 临时文件
-tmp-*
-*.tmp
-
-# 系统
-Thumbs.db
-.DS_Store
+# 依赖与构建产物
 node_modules/
+*.log

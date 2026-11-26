@@ -12,6 +12,45 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "task|task_append",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const{pathToFileURL}=require('url');import(pathToFileURL(process.argv[1]).href).catch(e=>{process.stderr.write('dispatch-hook: 加载失败 '+(e&&e.message)+'\\n');process.exit(2)})\" \"${PLUGIN_ROOT}/scripts/dispatch-hook.mjs\"",
+            "commandWindows": "node -e \"const{pathToFileURL}=require('url');import(pathToFileURL(process.argv[1]).href).catch(e=>{process.stderr.write('dispatch-hook: 加载失败 '+(e&&e.message)+'\\n');process.exit(2)})\" \"${PLUGIN_ROOT}\\\\scripts\\\\dispatch-hook.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "task|task_append",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const{pathToFileURL}=require('url');import(pathToFileURL(process.argv[1]).href).catch(e=>{process.stderr.write('dispatch-hook: 加载失败 '+(e&&e.message)+'\\n');process.exit(2)})\" \"${PLUGIN_ROOT}/scripts/dispatch-hook.mjs\"",
+            "commandWindows": "node -e \"const{pathToFileURL}=require('url');import(pathToFileURL(process.argv[1]).href).catch(e=>{process.stderr.write('dispatch-hook: 加载失败 '+(e&&e.message)+'\\n');process.exit(2)})\" \"${PLUGIN_ROOT}\\\\scripts\\\\dispatch-hook.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "verifier",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const{pathToFileURL}=require('url');import(pathToFileURL(process.argv[1]).href).catch(e=>{process.stderr.write('dispatch-hook: 加载失败 '+(e&&e.message)+'\\n');process.exit(2)})\" \"${PLUGIN_ROOT}/scripts/dispatch-hook.mjs\"",
+            "commandWindows": "node -e \"const{pathToFileURL}=require('url');import(pathToFileURL(process.argv[1]).href).catch(e=>{process.stderr.write('dispatch-hook: 加载失败 '+(e&&e.message)+'\\n');process.exit(2)})\" \"${PLUGIN_ROOT}\\\\scripts\\\\dispatch-hook.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }

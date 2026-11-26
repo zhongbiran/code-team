@@ -1,0 +1,32 @@
+{
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "codex 调用必须走 scripts/codex-teammjs不要裸跑 codex exec",
+      "text": "Codex 调用必须走 scripts/codex-team.mjs，不要裸跑 codex exec",
+      "count": 2,
+      "firstSeen": "2026-11-23T06:47:26.961Z",
+      "lastSeen": "2026-11-23T06:49:01.888Z",
+      "history": [
+        "Codex 调用必须走 scripts/codex-team.mjs，不要裸跑 codex exec"
+      ],
+      "promoted": "no-bare-codex-exec.mjs",
+      "promotedAt": "2026-11-23T06:49:03.279Z",
+      "promotedDesc": "禁止绕过封装直接调 codex exec（本机 WebSocket 不通，裸跑白等 120 秒）"
+    },
+    {
+      "id": "L-002",
+      "key": "脚本不要硬编码绝对路径用 __dirname 推导",
+      "text": "脚本不要硬编码绝对路径，用 __dirname 推导",
+      "count": 2,
+      "firstSeen": "2026-11-23T06:47:27.619Z",
+      "lastSeen": "2026-11-23T06:49:02.564Z",
+      "history": [
+        "脚本不要硬编码绝对路径，用 __dirname 推导"
+      ],
+      "promoted": "no-hardcoded-abs-paths.mjs",
+      "promotedAt": "2026-11-23T06:49:03.971Z",
+      "promotedDesc": "禁止脚本硬编码绝对路径，用 __dirname 推导"
+    }
+  ]
+}

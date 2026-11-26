@@ -8,7 +8,9 @@
 //   node scripts/lessons.mjs record "<纠正内容>"   记录一次纠正
 //   node scripts/lessons.mjs list                    列出台账，标出该升级的
 //   node scripts/lessons.mjs promote <ID> "<检查脚本名>" "<检查描述>"
-//   node scripts/lessons.mjs check                   跑所有已升级的检查
+//   node scripts/lessons.mjs check                   跑随包检查 + 台账已升级的检查
+//   node scripts/lessons.mjs check --briefs <目录> [--project <根目录>]
+//                                                       用本轮 brief 样本跑编译闸 / 归属闸
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -29,6 +31,9 @@ function bundledChecks() {
     return [];
   }
 }
+
+// 接受 brief 参数的检查：编译闸与文件归属互斥闸要看本轮 brief 样本。
+const BRIEF_CHECKS = ["brief-requires-compile-gate.mjs", "brief-file-ownership-disjoint.mjs"];
 
 function checkPlan(ledger) {
   const plan = [];
@@ -145,7 +150,7 @@ function cmdListChecks() {
   for (const item of checkPlan(ledger)) console.log(item.name);
 }
 
-function cmdCheck() {
+function cmdCheck(args) {
   // 递归守卫：检查脚本再调总入口就是无限递归，直接拒掉。
   if (process.env[DEPTH_ENV]) {
     console.error(`检测到检查入口的递归调用（${DEPTH_ENV} 已设置）——检查脚本不许再跑总入口。`);
@@ -166,14 +171,22 @@ function cmdCheck() {
       failed++;
       continue;
     }
-    const res = spawnSync(process.execPath, [file], {
+    // brief 参数透传：编译闸与归属闸要看本轮样本。
+    const scriptArgs = [file];
+    if (BRIEF_CHECKS.includes(item.name)) {
+      if (args.briefs) scriptArgs.push("--briefs", args.briefs);
+      if (args.project) scriptArgs.push("--project", args.project);
+    }
+    const res = spawnSync(process.execPath, scriptArgs, {
       encoding: "utf8",
       cwd: ROOT,
       env: { ...process.env, [DEPTH_ENV]: "1" },
     });
     const out = (res.stdout || "") + (res.stderr || "");
+    const skipped = /^SKIP/m.test(out.trim());
     if (res.status === 0) {
-      console.log(`PASS ${tag}  ${item.name}`);
+      console.log(`${skipped ? "SKIP" : "PASS"} ${tag}  ${item.name}`);
+      if (skipped && out.trim()) console.log(out.trim().split("\n").map((line) => "      " + line).join("\n"));
     } else {
       failed++;
       console.log(`FAIL ${tag}  ${item.name}`);
@@ -199,14 +212,14 @@ switch (args._[0]) {
   case "record": cmdRecord(args); break;
   case "list": cmdList(); break;
   case "promote": cmdPromote(args); break;
-  case "check": cmdCheck(); break;
+  case "check": cmdCheck(args); break;
   case "list-checks": cmdListChecks(); break;
   default:
     console.log("用法:");
     console.log('  lessons.mjs record "<纠正内容>"');
     console.log("  lessons.mjs list");
     console.log('  lessons.mjs promote <ID> "<检查脚本名>" "<描述>"');
-    console.log("  lessons.mjs check");
+    console.log("  lessons.mjs check [--briefs <目录>] [--project <根目录>]");
     console.log("  lessons.mjs list-checks");
     process.exit(args._[0] ? 2 : 0);
 }
