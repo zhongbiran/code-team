@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "name": "code-team",
+  "displayName": "Code Team",
+  "version": "1.2.0",
+  "description": "多 Agent 协作工作流：主会话编排，Codex CLI 担任 Overmind（总策划）与 Coder（编码方向规划），并用 worker/explore/verifier 三个子代理并行落地。派工前由宿主 hook 自动拦截不合格的 brief（编译闸 + 文件归属互斥），不再依赖人记得跑脚本。",
+  "author": "钟必然",
+  "icon": "icon.png",
+  "darkIcon": "icon-dark.png",
+  "category": "Code",
+  "exampleQueries": [
+    "用 Code Team 规划并实现这个需求",
+    "让 Overmind 先出方案，再拆包并行做"
+  ],
+  "apps": [],
+  "mcpServers": [],
+  "skills": [
+    "skills/code-team/SKILL.md"
+  ],
+  "agents": [],
+  "hooks": [
+    "hooks/hooks.json"
+  ]
+}

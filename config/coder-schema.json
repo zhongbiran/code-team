@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["summary", "steps", "risks", "openQuestions"],
+  "properties": {
+    "summary": { "type": "string" },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "detail", "owner", "acceptance"],
+        "properties": {
+          "title": { "type": "string" },
+          "detail": { "type": "string" },
+          "owner": { "type": "string" },
+          "acceptance": { "type": "string" }
+        }
+      }
+    },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "openQuestions": { "type": "array", "items": { "type": "string" } }
+  }
+}
