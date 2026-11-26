@@ -236,6 +236,17 @@ node scripts/dispatch-guard.mjs --plan <包数> --budget
   生产 key 零改动，但仍是越界）。测试必须走仓库自带的隔离机制（如 `TestIsolation.cs` 的进程级环境变量）。
 
 
+### 上下文窗口纪律（2026-11-26）
+
+**别给执行侧子代理开 1M 上下文。** 每次模型调用都重发整段累积上下文，窗口越大，
+token 消耗按累积上下文线性放大 —— 一个「快速实现型」的 worker 不需要 1M。
+本机已把 `D:\.minimax\config.yaml` 的 `defaultModelContextWindow` 从 1000000 降到 **512000**
+（模型自身 `limit.context` 本来就是 512000，1M 只是 `contextWindowOptions` 里标 `higher_usage` 的可选项）。
+实测：改后新开的 worker 会话 `contextWindowTokens = 512000`，无需重启宿主。
+
+**代价**：上下文压缩会更早发生，worker 的长任务要更频繁地靠 brief + 文件落盘交接，
+不要让它把整份源码读进上下文来「记住」。
+
 **派工前后各记一条事件**（这是"哪些任务、哪些 skill 调用了多少次、耗时多少"的唯一来源）：
 
 ```bash

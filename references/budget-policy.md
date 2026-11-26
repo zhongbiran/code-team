@@ -48,6 +48,14 @@ Worker 在实现过程中遇到已规划范围内的问题，自己解决；只�
 - 只是要查一个符号在哪（用 Explore）
 - 只是要审一遍已完成的工作（用 Verifier）
 
+## 上下文窗口是成本杠杆（2026-11-26）
+
+执行侧子代理（worker / explore / verifier）的上下文窗口已设为 **512000**
+（`D:\.minimax\config.yaml` 的 `defaultModelContextWindow`）。
+原因：每次模型调用都重发累积上下文，窗口从 512k 提到 1M 会让单次调用成本翻倍；
+执行者读得多、上下文涨得快，1M 会把 token 账放大到「跑很久产出为零」的量级。
+真正该控的是**轮次与读取量**，不是窗口大小。
+
 ## 执行侧真实用量（2026-11-25 起）
 
 账本 `config/events.jsonl` 里 mcode-agent 侧的 `usage` 字段 100% 为 null，
