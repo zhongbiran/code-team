@@ -397,16 +397,30 @@ if (isMain) {
     ? resolveCapability(role, savedModel, savedEffort)
     : { model: { state: "confirmed", values: null }, effort: { state: "confirmed", values: null } };
 
+  // 与 agent 自身声明相同的 model 不下传：显式传 model 会覆盖 agent 声明的 x-mavis.contextWindow，
+  // 子会话被顶到模型目录里最大的上下文档（实测 512k → 1M，cacheRead 按累积上下文线性放大）。
+  // agent 默认已经生效，下传同一个值没有任何收益，只有代价。
+  const agentDef = readAgentDefinition(role);
+  const sameAsAgentDefault = Boolean(agentDef?.model && savedModel && savedModel === agentDef.model);
   const model = capability.model.state === "confirmed" ? savedModel : null;
+  // 真正下传给 Task 的是 dispatchModel：与 agent 自身声明相同的 model 不重复下传 ——
+  // agent 默认已经生效，显式下传同一个值只会覆盖 agent 声明的 x-mavis.contextWindow
+  //（实测：子会话从 512k 被顶成 1M，cacheRead 按累积上下文线性放大）。
+  // 换模型（与 agent 默认不同）时照常下传，控制台改模型依然真的生效。
+  const dispatchModel = sameAsAgentDefault ? null : model;
   const effort = capability.effort.state === "confirmed" ? savedEffort : null;
   const notes = [];
-  if (capability.model.state !== "confirmed") notes.push("已保存的 model 取不到宿主证据，未下传（原值保留在 requested.model）");
+  if (sameAsAgentDefault) {
+    notes.push("已保存的 model 与 agent 自身声明一致，未下传（显式传同一个 model 会覆盖 agent 声明的上下文窗口，实测 512k → 1M）");
+  } else if (capability.model.state !== "confirmed") {
+    notes.push("已保存的 model 取不到宿主证据，未下传（原值保留在 requested.model）");
+  }
   if (capability.effort.state !== "confirmed") notes.push("已保存的 effort 取不到宿主证据，未下传（原值保留在 requested.effort）");
 
   const taskArgs = isMcode
     ? {
         agent_name: roleCfg.agent ?? role,
-        ...(model ? { model } : {}),
+        ...(dispatchModel ? { model: dispatchModel } : {}),
         ...(effort ? { effort } : {}),
       }
     : null;

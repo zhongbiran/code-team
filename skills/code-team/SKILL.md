@@ -119,6 +119,8 @@ brief 由 Overmind 写：主会话不补需求的隐含条件，也不替它写 
 5. **验收一次**：首轮 FAIL 由执行者自证修复，Verifier 不复验第二遍（除非改动了验收口径本身）。
 6. **成本闸看 toolCalls**：单包 > 200 次 tool 调用 = 包太大，拆；> 60M token = 包有结构问题，重拆。
 
+上下文窗口纪律（2026-11-27）：派工**不要显式传与 agent 默认相同的 model** —— 实测会把子会话从 512k 顶成 1M 档，cacheRead 按累积上下文线性放大；`dispatch-params` 已自动不下传，照抄它的 `taskArgs` 即可。守卫见 `checks/subagent-context-window.mjs`。
+
 其余红线：
 
 - 决策调用一律走 `scripts/codex-team.mjs`，不裸跑 `codex exec`；换 codex 模型前用 `codex debug models` 确认 id 有效。

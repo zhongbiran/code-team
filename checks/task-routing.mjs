@@ -313,10 +313,10 @@ async function scenarioDispatch(sandbox) {
   ok("已保存的 effort 真的进入派工参数",
     params.effort === "high",
     JSON.stringify(params));
-  ok("Task 参数带上 model/effort",
+  ok("Task 参数带上 agent/effort；与 agent 声明相同的 model 不重复下传",
     params.taskArgs?.agent_name === "worker"
-    && params.taskArgs?.model === "minimax/MiniMax-M3.1-Flash"
-    && params.taskArgs?.effort === "high",
+    && params.taskArgs?.effort === "high"
+    && !("model" in params.taskArgs),
     JSON.stringify(params.taskArgs));
   ok("派工参数校验通过", validateDispatch(params, { savedModel: "minimax/MiniMax-M3.1-Flash", savedEffort: "high" }).length === 0,
     validateDispatch(params, { savedModel: "minimax/MiniMax-M3.1-Flash", savedEffort: "high" }).join("; "));
@@ -376,6 +376,9 @@ async function scenarioCapability(sandbox) {
       privParams && privParams.status === "OK"
       && privParams.model === "custom_provider:provider-f0370a/GLM-5.3-Flash",
       JSON.stringify(privParams));
+    ok("换了模型（与 agent 默认不同）→ Task 参数里真的带上 model",
+      privParams && privParams.taskArgs?.model === "custom_provider:provider-f0370a/GLM-5.3-Flash",
+      JSON.stringify(privParams?.taskArgs));
   } finally {
     await rm(privateSandbox.dir, { recursive: true, force: true });
   }
