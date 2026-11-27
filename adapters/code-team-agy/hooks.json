@@ -1,0 +1,42 @@
+{
+  "code-team-agy-gates": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "./scripts/run-node.sh ./scripts/dispatch-hook.mjs",
+        "timeout": 10
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "run_command|invoke_subagent|swarm",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/run-node.sh ./scripts/dispatch-hook.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "run_command|invoke_subagent|swarm",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/run-node.sh ./scripts/dispatch-hook.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "./scripts/run-node.sh ./scripts/dispatch-hook.mjs",
+        "timeout": 10
+      }
+    ]
+  }
+}

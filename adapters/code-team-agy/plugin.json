@@ -1,0 +1,14 @@
+{
+  "name": "code-team-agy",
+  "displayName": "Code Team (Antigravity)",
+  "version": "2.0.0",
+  "description": "Antigravity-native multi-agent engineering workflow: Three-pool routing (Claude Opus/Sonnet + Gemini 4 + MiniMax mcode exec), hard lifecycle hooks, worktree isolation, and domain skills for full-stack and Rust hardware projects.",
+  "author": {
+    "name": "Zhong Biran"
+  },
+  "suggestedPrompts": [
+    "用 Code Team 规划并并行实现这个跨端需求",
+    "用 Code Team 对当前模块做一次只读取证与风险评估",
+    "检查本轮 Code Team 的事件用量与所有硬闸门状态"
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "version": "2.0.0",
+  "host": "antigravity",
+  "pools": {
+    "claude_pro": {
+      "label": "Google AI Pro · Claude 独立配额池",
+      "models": [
+        "claude-opus-5-5-high",
+        "claude-opus-5-5-medium",
+        "claude-sonnet-5-5-medium"
+      ]
+    },
+    "gemini_pro": {
+      "label": "Google AI Pro · Gemini 4 独立配额池",
+      "models": [
+        "gemini-4-carbon-high",
+        "gemini-4-carbon-medium",
+        "gemini-4-neon-high",
+        "gemini-4-neon-medium",
+        "gemini-4-hydrogen-high",
+        "gemini-4-hydrogen-medium",
+        "gemini-4-hydrogen-low"
+      ]
+    },
+    "minimax_sub": {
+      "label": "MiniMax 独立订阅 · mcode exec 并发池",
+      "cli": "/Users/biranzhong/.minimax-code/bin/mcode",
+      "model": "minimax/MiniMax-M3.1-Flash",
+      "effort": "high",
+      "maxContextWindow": 512000
+    }
+  },
+  "roles": {
+    "coordinator": {
+      "label": "主会话调度台",
+      "primary": { "pool": "gemini_pro", "model": "gemini-4-hydrogen-medium" },
+      "skills": ["code-team-agy", "dual-backend-router"]
+    },
+    "overmind": {
+      "label": "Overmind 总规划师",
+      "kind": "decision",
+      "subagentTier": "pro",
+      "primary": { "pool": "claude_pro", "model": "claude-opus-5-5-medium" },
+      "fallback": { "pool": "gemini_pro", "model": "gemini-4-neon-high" },
+      "escalation": { "pool": "gemini_pro", "model": "gemini-4-carbon-medium" },
+      "skills": [
+        "brainstorming",
+        "writing-plans",
+        "contract-first-architect",
+        "dual-backend-router"
+      ]
+    },
+    "coder": {
+      "label": "Coder 技术总牵头 / 难点攻坚",
+      "kind": "architect_spike",
+      "subagentTier": "pro",
+      "primary": { "pool": "claude_pro", "model": "claude-opus-5-5-high" },
+      "fallback": { "pool": "gemini_pro", "model": "gemini-4-neon-high" },
+      "escalation": { "pool": "gemini_pro", "model": "gemini-4-carbon-high" },
+      "skills": [
+        "contract-first-architect",
+        "root-cause-and-escalation",
+        "systematic-debugging",
+        "context7-mcp"
+      ]
+    },
+    "worker": {
+      "label": "Worker 快速并发执行者",
+      "kind": "execution",
+      "subagentTier": "flash",
+      "primary": {
+        "pool": "minimax_sub",
+        "backend": "mcode-exec",
+        "model": "minimax/MiniMax-M3.1-Flash",
+        "effort": "high",
+        "mode": "lightweight",
+        "promptMode": "coding",
+        "maxSteps": 100,
+        "timeout": "20m"
+      },
+      "fallback": {
+        "pool": "gemini_pro",
+        "backend": "antigravity-native",
+        "model": "gemini-4-hydrogen-medium"
+      },
+      "skills": [
+        "test-driven-development",
+        "verification-before-completion",
+        "worktree-safe-merge"
+      ]
+    },
+    "explore": {
+      "label": "Explore 只读侦察兵",
+      "kind": "recon",
+      "subagentTier": "flash_lite",
+      "primary": {
+        "pool": "minimax_sub",
+        "backend": "mcode-exec",
+        "model": "minimax/MiniMax-M3.1-Flash",
+        "effort": "high",
+        "mode": "lightweight",
+        "promptMode": "coding",
+        "maxSteps": 20,
+        "timeout": "5m"
+      },
+      "fallback": {
+        "pool": "gemini_pro",
+        "backend": "antigravity-native",
+        "model": "gemini-4-hydrogen-low"
+      },
+      "skills": []
+    },
+    "verify": {
+      "label": "Verify 异构交叉验收官",
+      "kind": "verification",
+      "subagentTier": "pro",
+      "primary": { "pool": "claude_pro", "model": "claude-sonnet-5-5-medium" },
+      "fallback": { "pool": "gemini_pro", "model": "gemini-4-neon-medium" },
+      "skills": [
+        "verification-before-completion",
+        "requesting-code-review"
+      ]
+    }
+  },
+  "domainRouting": {
+    "rust-hardware": [
+      "rust-hardware-protocol",
+      "context7-mcp"
+    ],
+    "frontend": [
+      "frontend-design-and-e2e",
+      "context7-mcp"
+    ],
+    "backend": [
+      "backend-data-isolation",
+      "contract-first-architect"
+    ],
+    "multi-repo-merge": [
+      "worktree-safe-merge",
+      "finishing-a-development-branch"
+    ]
+  },
+  "limits": {
+    "maxParallelMinimaxWorkers": 4,
+    "maxParallelHydrogenWorkers": 2,
+    "workerSoftContextTokens": 180000,
+    "workerHardContextTokens": 512000,
+    "workerMaxSteps": 100,
+    "workerHardToolCalls": 180,
+    "workerMaxTotalTokens": 55000000,
+    "exploreMaxSteps": 20,
+    "sameErrorCircuitBreaker": 3,
+    "neonToCarbonEscalationRounds": 2,
+    "retryCooldownSeconds": 120,
+    "maxDomainSkillsPerPackage": 2
+  }
+}
