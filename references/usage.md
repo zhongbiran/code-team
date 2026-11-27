@@ -154,7 +154,7 @@ node scripts/dispatch-params.mjs --capabilities                          # 宿�
 | `requested` | 配置里保存的原值（`model`/`effort`），即使没下传也保留在这里供展示 |
 | `status` | `OK` = 全部已证实；`CAPABILITY_UNKNOWN` = 有值取不到宿主证据，未下传 |
 | `capability` | 逐字段的取证结论：`state` 是 `confirmed`（可下传）或 `unknown`（不可下传），`values` 是取值域 |
-| `taskArgs` | **照抄进 Task 工具的参数**（`agent_name` / `model` / `effort`）；非内置后端为 `null` |
+| `taskArgs` | **照抄进 Task 工具的参数**（`agent_name` / `model` / `effort`）；非内置后端为 `null`。⚠ 与 agent 自身声明**相同**的 model 不在这里（见下） |
 | `attachment.specialty` | 专业方向附件（见下） |
 | `notes` | 人话说明哪一项没下传、为什么 |
 
@@ -390,7 +390,41 @@ code-team-brief-ref: {"planRevisionId":…,"packageId":…,"artifactId":…,"sha
 闸门在 `scripts/dispatch-hook.mjs`，真实用量在 `scripts/trajectory-usage.mjs`，撞墙续派在
 `scripts/retry-policy.mjs`，一次验收在 `scripts/verification-policy.mjs`。
 
-## 十七、典型用法与节奏
+## 十八、上下文窗口就是账单（2026-11-27 实测）
+
+**探针结论**：Task 里**显式传 model** → 运行时忽略 agent 自己声明的 `x-mavis.contextWindow`
+（worker/verifier 声明 512000），改用宿主模型目录里 `contextWindowOptions` 的最大值
+（M3.1-Flash 给到 1000000，标 `higher_usage`）。不传 model → 512000。
+上下文越大，每次模型调用重发的累积上下文越多，cacheRead 主导的账单线性放大。
+
+**规则**：
+1. `dispatch-params.mjs` **不下传与 agent 默认相同的 model**（agent 默认已生效，显式下传只有代价）。
+   换模型（与 agent 默认不同）照常下传 —— 控制台改模型依然真的生效。
+2. 派工时**照抄 `taskArgs`**（它已经是"该传的才传"），不要自己再加 model。
+3. 宿主 `config.yaml` 里别留 > 512000 的上下文选项（改完要重启宿主才生效）。
+4. 守卫：`checks/subagent-context-window.mjs`（台账 L-003）盯实际派工输出，下传的 model
+   与 agent 默认相同 → 红。
+
+## 十七、本轮复盘新增的硬规则（2026-11-27）
+
+完整复盘见 `references/lessons-2026-11-27-session-review.md`。落地为八条：
+
+1. **派工前三问**：证据在本机可达吗？需要改代码吗？能并进已有包吗？不可达的目标改成
+   "产出现场取证清单"，不派探索包。
+2. **brief 必须可证伪**：「假设 → 可证伪的检查 → 结论」+ 止损条件（查不到就报断点，
+   不得继续扩散）。时间盒到点先看 `git status` 落盘深度再决定续派。
+3. **验收分层**：执行者跑「编译闸 + 专项测试」；验收者跑「一次专项测试」+ 读 diff；
+   全量与 `verify.ps1` 由编排者最后跑一次。
+4. **口径/枚举类改动一个包覆盖六处**：枚举 → 映射 → 读 → 写与校验 → 存量兼容 → 前端契约。
+5. **同一批要么全走闸门，要么整批不带 verification-key**（闸门外派工的包没有已终结记录，
+   整批验收会被拒）。
+6. **需求文件带仓库硬约束**（验收命令口径、临时产物落点、隔离红线），否则 Overmind 会写
+   本仓库走不通的命令。
+7. **需要路径/约束时写进需求文件**让 Overmind 落进 brief；宿主注入 brief 正文时会整体替换 prompt，
+   主会话补的东西不会并存。
+8. **注释纪律写进 brief**：不写解释性注释，只写"代码本身表达不了的为什么"。
+
+## 十九、典型用法与节奏
 
 ```
 你：给设备加个导出 CSV 功能，用 Code Team

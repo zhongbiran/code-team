@@ -44,11 +44,11 @@
       "label": "Explore",
       "kind": "execution",
       "backend": "mcode-agent",
-      "model": "minimax/MiniMax-M3.1-Flash",
-      "effort": null,
+      "model": "custom_provider:opencode-go/iceman-contributor-free",
+      "effort": "low",
       "agent": "explore",
       "skills": [],
-      "note": "只读取证与定位，不改文件。"
+      "note": "只读取证与定位，不改文件。2026-11-27 起降档：explore 走免费模型 + low 档，不再占 M3.1 高档额度。"
     },
     "verifier": {
       "label": "Verifier",
